@@ -1,6 +1,11 @@
 ---
 title: "01-test_template"
-output: html_document
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    # code_folding: hide
 editor_options: 
   chunk_output_type: console
 ---
@@ -11,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## packages
 
-```{r}
+```{r,echo=TRUE,warning=FALSE,message=FALSE}
 library(tidyverse)
 library(readxl)
 library(plater)
@@ -45,7 +50,7 @@ list.files(path = "data-raw/",
 
 ## read inputs
 
-- read multiple plates with `plater`
+- read the filename of multiple `csv`
 
 ```{r}
 name_input <- 
@@ -56,7 +61,11 @@ name_input <-
   mutate(name = str_replace(value,"(.+)p(...)\\.csv","placa_\\2"))
 
 name_input
+```
 
+- read multiple plates with `plater`
+
+```{r}
 data4 <- read_plates(
   files = name_input %>% pull(value),
   plate_names = name_input %>% pull(name),
@@ -69,7 +78,10 @@ data4 %>%
   epihelper::print_inf()
 ```
 
-```{r}
+## save plates in long format
 
+```{r}
+data4 %>% 
+  write_rds("data/multiplate-long.rds")
 ```
 
