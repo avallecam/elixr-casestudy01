@@ -1,0 +1,75 @@
+---
+title: "01-test_template"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## packages
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(plater)
+```
+
+
+## change inputs format
+
+- read multiple `xlsx` and write multiple `csv`
+
+```{r}
+# one
+# plate <- read_excel("data-raw/template-toxo_ig-p001.xlsx",sheet = 1)
+# write_csv(x = plate,file = "data/template-toxo_ig-p001.csv")
+
+# multiple
+list.files(path = "data-raw/",
+           pattern = ".xlsx",
+           full.names = TRUE) %>%
+  enframe(name = NULL) %>% 
+  mutate(data_tab01 = map(.x = value,
+                          .f = read_excel,
+                          sheet = 1)) %>% 
+  mutate(file = map_chr(.x = value,
+                             .f = str_replace, 
+                             "data-raw/(.+)xlsx","data/\\1csv")) %>% 
+  mutate(data_save = pmap(.l = select(.,x = data_tab01, file),
+                          .f = write_csv))
+```
+
+
+## read inputs
+
+- read multiple plates with `plater`
+
+```{r}
+name_input <- 
+  list.files(path = "data/",
+             pattern = ".csv",
+             full.names = TRUE) %>% 
+  enframe(name = NULL) %>% 
+  mutate(name = str_replace(value,"(.+)p(...)\\.csv","placa_\\2"))
+
+name_input
+
+data4 <- read_plates(
+  files = name_input %>% pull(value),
+  plate_names = name_input %>% pull(name),
+  well_ids_column = "Pozo") %>% 
+  mutate(densidad = str_replace(densidad,"\\,","\\.")) %>% 
+  mutate(densidad = as.numeric(densidad)) %>% 
+  janitor::clean_names()
+
+data4 %>% 
+  epihelper::print_inf()
+```
+
+```{r}
+
+```
+
