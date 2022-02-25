@@ -88,6 +88,6 @@ data4 %>%
 ```
 
 ```{r}
-
+data4 %>% count(plate)
 ```
 
