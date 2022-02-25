@@ -83,5 +83,11 @@ data4 %>%
 ```{r}
 data4 %>% 
   write_rds("data/multiplate-long.rds")
+data4 %>% 
+  writexl::write_xlsx("data/multiplate-long.xlsx")
+```
+
+```{r}
+
 ```
 
