@@ -14,13 +14,13 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## packages
+# packages
 
 ```{r,echo=TRUE,warning=FALSE,message=FALSE}
 library(tidyverse)
 ```
 
-## import plates in long-format
+# import plates in long-format
 
 ```{r}
 data4 <- read_rds("data/multiplate-long.rds")
@@ -30,7 +30,7 @@ data4 %>%
   identity()
 ```
 
-## create standardization dataframe
+# create standardization dataframe
 
 ```{r}
 std_reference <- 
@@ -54,9 +54,9 @@ std_reference <-
 std_reference
 ```
 
-## build density ~ abunit relationship
+# build density ~ abunit relationship
 
-### isolate standard curves
+## isolate standard curves
 
 ```{r}
 data5 <- data4 %>% 
@@ -73,7 +73,7 @@ data6 <- data4 %>%
   filter(str_detect(codigo,"ctrl"))
 ```
 
-### descriptive
+## descriptive
 
 ```{r,fig.height=3,fig.width=7}
 data5 %>% 
@@ -86,7 +86,7 @@ data5 %>%
   facet_grid(~plate)
 ```
 
-### log-logistic model
+## log-logistic model
 
 - [pending]
 
@@ -94,9 +94,9 @@ data5 %>%
 
 ```
 
-## quality control of replicates
+# quality control of replicates
 
-### replicates per plate
+## replicates per plate
 
 - how many sample replicates are in each plate?
 
@@ -111,7 +111,7 @@ data4 %>%
   count(plate,codigo,sort = T)
 ```
 
-### replicates all plate
+## replicates all plate
 
 - how many sample replicates are in all plates?
 
@@ -126,7 +126,7 @@ data4 %>%
   count(codigo,sort = T)
 ```
 
-### replicate variability
+## replicate variability
 
 ```{r}
 data7 <- data4 %>% 
@@ -142,7 +142,7 @@ data7 <- data4 %>%
 data7
 ```
 
-#### identify outliers
+### identify outliers
 
 ```{r}
 data8 <- data7 %>% 
@@ -164,9 +164,9 @@ data4 %>%
 ```
 
 
-#### distribution table
+### distribution table
 
-##### con outlier
+#### con outlier
 
 ```{r}
 data7 %>% 
@@ -175,7 +175,7 @@ data7 %>%
   skimr::yank(skim_type = "numeric")
 ```
 
-##### sin outlier
+#### sin outlier
 
 ```{r}
 data7 %>% 
@@ -185,9 +185,9 @@ data7 %>%
   skimr::yank(skim_type = "numeric")
 ```
 
-#### distribution plot
+### distribution plot
 
-##### con outlier
+#### con outlier
 
 ```{r,fig.height=3,fig.width=6}
 data7 %>% 
@@ -201,7 +201,7 @@ data7 %>%
   facet_grid(~plate)
 ```
 
-##### sin outlier
+#### sin outlier
 
 ```{r,fig.height=3,fig.width=6}
 data7 %>% 
@@ -216,7 +216,7 @@ data7 %>%
   facet_grid(~plate)
 ```
 
-## estimate abunits of samples
+# estimate abunits of samples
 
 - [pending]
 
@@ -224,9 +224,9 @@ data7 %>%
 
 ```
 
-## view plate shape
+# view plate shape
 
-```{r}
+```{r,eval=FALSE}
 plater::view_plate(
   data = data4 %>% filter(plate=="placa_001"), 
   well_ids_column = "pozo", 
@@ -241,15 +241,15 @@ plater::view_plate(
 ```
 
 
-## end
+# end
 
 ```{r}
 
 ```
 
-## draft
+# draft
 
-#### 4pll per template
+### 4pll per template
 
 ```{r,message=FALSE, eval=FALSE}
 
@@ -349,7 +349,7 @@ mod_bt <- mod_bx %>% as.data.frame() %>% rownames_to_column() %>% as.tibble() %>
 new <- new %>% mutate(ord=as.numeric(ord)) %>% arrange(Plate,ord)
 ```
 
-#### outputs
+### outputs
 
 ```{r, eval=FALSE}
 #
