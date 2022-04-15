@@ -75,7 +75,7 @@ data6 <- data4 %>%
 
 ## descriptive
 
-```{r,fig.height=3,fig.width=7}
+```{r,fig.height=10,fig.width=10}
 data5 %>% 
   ggplot(aes(x = abunits,y = densidad)) +
   geom_point() +
@@ -83,7 +83,7 @@ data5 %>%
   geom_hline(aes(yintercept=densidad, color = codigo),
              data = data6) +
   scale_x_log10() +
-  facet_grid(~plate)
+  facet_wrap(~plate+experimento)
 ```
 
 ## log-logistic model
@@ -103,12 +103,14 @@ data5 %>%
 ```{r,message=FALSE}
 data4 %>% 
   filter(!str_detect(codigo,"STD|ctrl")) %>% 
-  count(plate,codigo,sort = T) %>% 
+  count(plate,experimento,codigo,sort = T) %>% 
   count(n)
 
 data4 %>% 
   filter(!str_detect(codigo,"STD|ctrl")) %>% 
-  count(plate,codigo,sort = T)
+  count(plate,experimento,codigo,sort = T) %>% 
+  # epihelper::print_inf() %>% 
+  identity()
 ```
 
 ## replicates all plate
@@ -131,7 +133,7 @@ data4 %>%
 ```{r}
 data7 <- data4 %>% 
   filter(!str_detect(codigo,"STD|ctrl")) %>% 
-  group_by(plate,codigo) %>% 
+  group_by(plate,experimento,codigo) %>% 
   summarise(densidad_mean=mean(densidad),
             densidad_sd=sd(densidad)) %>% 
   ungroup() %>% 
@@ -189,7 +191,7 @@ data7 %>%
 
 #### con outlier
 
-```{r,fig.height=3,fig.width=6}
+```{r,fig.height=10,fig.width=10}
 data7 %>% 
   ggplot(aes(x = densidad_mean,y = densidad_cv)) +
   geom_point() +
@@ -198,12 +200,12 @@ data7 %>%
   geom_vline(aes(xintercept=0.25),
              linetype="dashed",size=0.3) +
   coord_cartesian(ylim = c(0,100)) +
-  facet_grid(~plate)
+  facet_wrap(~plate+experimento)
 ```
 
 #### sin outlier
 
-```{r,fig.height=3,fig.width=6}
+```{r,fig.height=10,fig.width=10}
 data7 %>% 
   filter(densidad_mean<900) %>% 
   ggplot(aes(x = densidad_mean,y = densidad_cv)) +
@@ -213,7 +215,7 @@ data7 %>%
   geom_vline(aes(xintercept=0.25),
              linetype="dashed",size=0.3) +
   coord_cartesian(ylim = c(0,100)) +
-  facet_grid(~plate)
+  facet_wrap(~plate+experimento)
 ```
 
 # estimate abunits of samples
