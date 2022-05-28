@@ -7,7 +7,7 @@ output:
     toc_float: true
     code_folding: hide
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -128,11 +128,24 @@ data4 %>%
   count(codigo,sort = T)
 ```
 
+## replicate type
+
+```{r}
+data4 %>% 
+  filter(str_detect(codigo,"ctrl")) %>% 
+  count(plate,experimento,codigo) %>% 
+  identity()
+  # group_by(plate,experimento,codigo) %>% 
+  # skimr::skim(n)
+```
+
+
 ## replicate variability
 
 ```{r}
 data7 <- data4 %>% 
-  filter(!str_detect(codigo,"STD|ctrl")) %>% 
+  # filter(!str_detect(codigo,"STD|ctrl")) %>% 
+  filter(!str_detect(codigo,"STD")) %>% 
   group_by(plate,experimento,codigo) %>% 
   summarise(densidad_mean=mean(densidad),
             densidad_sd=sd(densidad)) %>% 
@@ -218,14 +231,6 @@ data7 %>%
   facet_wrap(~plate+experimento)
 ```
 
-# estimate abunits of samples
-
-- [pending]
-
-```{r}
-
-```
-
 # view plate shape
 
 ```{r,eval=FALSE}
@@ -242,133 +247,23 @@ plater::view_plate(
 )
 ```
 
-
-# end
+# output data sets
 
 ```{r}
-
+data9 <- data4 %>% 
+  filter(!str_detect(codigo,"STD")) #%>% 
+  # filter(str_detect(codigo,"ctrl"))
 ```
 
-# draft
-
-### 4pll per template
-
-```{r,message=FALSE, eval=FALSE}
-
-mab_ir <- NULL
-mod_bx <- NULL
-
-#
-# new dose levels as support for the line
-#mdo$Ab.units %>% summary()
-new_x <- expand.grid(exp(seq(log(0.1),log(2048),length=100)))
-# db to add predictions of all plates
-new <- data_frame(ord=as.character(),
-                  resp=as.double(),
-                  p=as.double(),
-                  pmin=as.double(),
-                  pmax=as.double(),
-                  Plate=as.character())
-#
-
-for (j in 1:length(levels(phe$Plate))) {
-  
-#
-# 5 PARAMETER ESTIMATION 4pLL model
-#
-wb.m1 <- drm(OD ~ Ab.unit, Plate, 
-               data= std %>% filter(Plate==levels(phe$Plate)[j]),#j
-             #data= std,
-               fct = LL.4(names = c("b", "c", "d", "e")))
-#
-wb.model <- wb.m1
-# 6 BOX-COX TRANSFORMATION against RESIDUAL heterogeneity
-wb.model.BX <- boxcox(wb.model, 
-                     main=expression("Optimal " ~ lambda ~ " with confidence intervals"), 
-                     plotit = FALSE)
-#coefficients(wb.model.BX) %>% matrix(7,4)
-mab_p <- mab %>% as.data.frame()
-# 7 UNK AB.UNITS ESTIMATION by INVERSE REGRESSION
-mir <- ED(wb.model.BX, 
-                 mab_p[mab_p$Plate==levels(phe$Plate)[j],"mean.OD"],#j
-                   #wb_MEAN[1:n,5],
-                   type = "absolute",interval = "delta",
-                   #clevel = "Pfal", 
-                 display = FALSE)
-  
-mab_ir <- rbind(mab_ir,mir)
-mod_bx <- rbind(mod_bx,coefficients(wb.model.BX))
-
-#
-# predictions and confidence intervals
-pdm <- predict(wb.model.BX, newdata = new_x, interval = "confidence")
-# new data with predictions
-new_p <- bind_cols(new_x %>% 
-                     as.tibble() %>% 
-                     rownames_to_column(var = "ord")
-                   , pdm %>% 
-                     as.tibble() %>% 
-                     rownames_to_column(var = "ord")
-                   ) %>%
-  dplyr::select(-ord1) %>% 
-  mutate(Plate=levels(phe$Plate)[j]) %>% 
-  dplyr::rename(resp=Var1,p=Prediction,pmin=Lower,pmax=Upper)
-
-new <- union(new,new_p)
-#
-
-}
-
-#mab
-#mab[mab$Plate==levels(phe$Plate)[1],] #%>% duplicated() %>% sum()
-
-# 7.1 FEED UNK AB.UNITS DATA.FRAME
-mdo <- mab_ir %>% as.data.frame() %>% rownames_to_column() %>% 
-  #dplyr::rename(ord=rowname) %>% 
-  separate(rowname,c("par","Plate","mean.OD.c"),sep = ":") %>% 
-  rownames_to_column("ord") %>% 
-  #mutate(ord=seq(1,dim(.)[1])) %>% 
-  full_join(mab %>% 
-              mutate(ord=as.character(ord)) %>% 
-              mutate(mean.OD.c=as.character(mean.OD))
-            ,
-            by = c("ord","Plate","mean.OD.c")) %>% 
-  dplyr::select(Plate,ord,ID,code,Type,#pheno,igg,
-                mean.OD,sd.OD,cv.OD,Ab.units=Estimate,
-         everything(),-par,-mean.OD.c,-Ab.unit) #%>% 
-  # ANY MANUAL FILTERING of replicate on different templates could be applied HERE!!!
-  #filter(!code=="2235_137") 
-
-mod_bt <- mod_bx %>% as.data.frame() %>% rownames_to_column() %>% as.tibble() %>% 
-  full_join(std %>% 
-              dplyr::count(Plate) %>% dplyr::select(-n) %>% rownames_to_column(),
-            by="rowname") %>% 
-  dplyr::select(Plate,everything(),-rowname) %>% 
-  separate(Plate,c("Plate","anti"),sep = "_") #%>% 
-  #dplyr::rename(Plate=rowname) %>% 
-  #mutate(Plate=stringr::str_replace(Plate,"(\\d)","N\\1"))
-
-new <- new %>% mutate(ord=as.numeric(ord)) %>% arrange(Plate,ord)
+```{r,eval=FALSE}
+# data4 # all 
+# only std + density ~ abunits
+data5 %>% write_rds("data/02-data-standard_curve.rds") 
+# data6 # only ctrl
+# samples and ctrl with stat measurements per code
+data7 %>% write_rds("data/02-data-ab_mean.rds") 
+# data8 # outliers if any
+# data9 # only samples and ctrl
 ```
 
-### outputs
 
-```{r, eval=FALSE}
-#
-#fin
-#end
-#mod
-#mab
-
-# standard curve data
-std
-
-# estimated ab unit data
-mdo
-
-# estimated parameters per standard curve
-mod_bt
-
-# predicted model per standard curve 
-new
-```
