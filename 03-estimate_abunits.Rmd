@@ -1,0 +1,258 @@
+---
+title: "03-estimate_abunits"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# packages
+
+```{r,echo=TRUE,warning=FALSE,message=FALSE}
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse)
+pacman::p_load(drc)
+```
+
+```{r}
+options(scipen=10000)
+```
+
+
+# import input data
+
+```{r}
+data_stdc <- read_rds("data/02-data-standard_curve.rds") 
+data_abmean <- read_rds("data/02-data-ab_mean.rds") 
+```
+
+# fit 4pll model
+
+```{r}
+mab_ir <- NULL
+mod_bx <- NULL
+j <- 1
+```
+
+
+## get data
+
+```{r}
+data_drm_stdc <- data_stdc %>% 
+  filter(plate==unique(data_stdc$plate)[j]) %>% 
+  filter(experimento==unique(data_stdc$experimento)[j]) %>% 
+  # mutate(plate=as.factor(plate)) %>% 
+  # as.data.frame() %>% 
+  identity()
+# data_drm_stdc %>% class()
+# data_drm_stdc
+```
+
+## dose response model
+
+```{r}
+wb.model <- 
+  drm(formula = densidad ~ abunits, 
+    curveid = plate,
+    data= data_drm_stdc,
+    fct = LL.4(names = c("b", "c", "d", "e")))
+#' "b" -> "Slope", 
+#' "c" -> "Lower Limit", 
+#' "d" -> "Upper Limit", 
+#' "e" -> "ED50"
+```
+
+```{r}
+wb.model %>% broom::tidy()
+# wb.model %>% broom::glance()
+```
+
+## box-cox transformation
+
+BOX-COX TRANSFORMATION against RESIDUAL heterogeneity
+
+```{r}
+wb.model.BX <- 
+  boxcox(wb.model, 
+         main=expression("Optimal " ~ lambda ~ " with confidence intervals"), 
+         plotit = FALSE)
+```
+
+```{r}
+wb.model.BX %>% broom::tidy()
+```
+
+## choose model
+
+```{r}
+# wb.model.BX <- wb.model
+```
+
+## model parameters
+
+```{r}
+data_drm_param <- 
+  wb.model.BX %>% 
+  broom::tidy() %>% 
+  mutate(plate=unique(data_stdc$plate)[j]) %>% 
+  dplyr::select(plate,everything())
+```
+
+# plate model
+
+## prediction and confidence interval
+
+```{r}
+data_new <- expand.grid(exp(seq(log(0.1),log(2048),length=100)))
+```
+
+```{r,warning=FALSE}
+# predictions and confidence intervals
+pdm <- predict(object = wb.model.BX, newdata = data_new, interval = "confidence")
+```
+
+## join data
+
+```{r}
+data_new_pred <- data_new %>% 
+  rownames_to_column() %>% 
+  left_join(
+    pdm %>% 
+      as_tibble() %>% 
+      rownames_to_column()) %>% 
+  mutate(plate=unique(data_stdc$plate)[j]) %>% 
+  dplyr::rename(resp=Var1,p=Prediction,pmin=Lower,pmax=Upper) %>% 
+  dplyr::select(plate,everything())
+```
+
+## results
+
+```{r}
+data_new_pred %>% 
+  ggplot() +
+  geom_line(aes(x = p,y = resp)) +
+  geom_line(aes(x = pmin,y = resp)) +
+  geom_line(aes(x = pmax,y = resp)) +
+  scale_y_log10()
+```
+
+
+# estimate abunits
+
+UNK AB.UNITS ESTIMATION by INVERSE REGRESSION
+
+## get data
+
+```{r}
+data_ed_abmean <- data_abmean %>% 
+  filter(plate==unique(data_stdc$plate)[j]) %>% 
+  filter(experimento==unique(data_stdc$experimento)[j])
+```
+
+## generate estimates
+
+```{r}
+data_ed_abunit <- 
+  ED(object = wb.model.BX, 
+     respLev = data_ed_abmean %>% pull(densidad_mean),#j #wb_MEAN[1:n,5],
+     type = "absolute",
+     interval = "delta",
+     #clevel = "Pfal", 
+     display = FALSE)
+```
+
+```{r,eval=FALSE}
+data_drm_stdc
+data_ed_abmean
+data_ed_abunit
+```
+
+```{r}
+data_abmean_abunit <- 
+  data_ed_abmean %>% 
+  rownames_to_column() %>% 
+  left_join(
+    data_ed_abunit %>% 
+      as_tibble() %>% 
+      rownames_to_column() %>% 
+      janitor::clean_names()
+  )
+```
+
+## results
+
+```{r}
+data_abmean_abunit %>% 
+  ggplot(aes(x = densidad_mean,y = estimate)) +
+  geom_point() +
+  scale_y_log10()
+```
+
+
+```{r,eval=FALSE}
+data_abmean_abunit %>% 
+  ggplot(aes(x = densidad_mean,y = estimate)) +
+  geom_errorbar(aes(ymin = lower, ymax = upper)) +
+  geom_point() +
+  scale_y_log10() #+ ylim(-2000,4000)
+```
+
+# plate and samples
+
+```{r}
+ggplot() +
+  geom_line(mapping = aes(x = p,y = resp),data = data_new_pred) +
+  geom_line(mapping = aes(x = pmin,y = resp),data = data_new_pred) +
+  geom_line(mapping = aes(x = pmax,y = resp),data = data_new_pred) +
+  geom_point(mapping = aes(x = densidad_mean,y = estimate),
+             data = data_abmean_abunit) +
+  scale_y_log10() #+ ylim(-2000,4000)
+```
+
+```{r,eval=FALSE}
+ggplot() +
+  geom_line(mapping = aes(x = p,y = resp),data = data_new_pred) +
+  geom_line(mapping = aes(x = pmin,y = resp),data = data_new_pred) +
+  geom_line(mapping = aes(x = pmax,y = resp),data = data_new_pred) +
+  geom_errorbar(mapping = aes(x = densidad_mean,y = estimate,
+                    ymin = lower, ymax = upper),
+                data = data_abmean_abunit) +
+  geom_point(mapping = aes(x = densidad_mean,y = estimate),
+             data = data_abmean_abunit) +
+  scale_y_log10() #+ ylim(-2000,4000)
+```
+
+
+# outputs
+
+```{r, eval=FALSE}
+#
+#fin
+#end
+#mod
+#data_abmean
+
+# standard curve data
+data_stdc
+
+# estimated ab unit data
+data_abmean_abunit
+
+# estimated parameters per standard curve
+data_drm_param
+
+# predicted model per standard curve 
+data_new_pred
+```
+
+# iterative modeling
+
+- [ ] use purrr to model to all stratas
