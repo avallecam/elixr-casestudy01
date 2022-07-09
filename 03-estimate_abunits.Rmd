@@ -255,4 +255,9 @@ data_new_pred
 
 # iterative modeling
 
+- [ ] overlap standard curve plate points with model
+- [ ] replicate the ggplot2 aesthetic from reference
 - [ ] use purrr to model to all stratas
+- [ ] identify the reference code for classification!
+- review https://rstats4ag.org/dose-response-curves.html
+- review https://bioassay.dk/

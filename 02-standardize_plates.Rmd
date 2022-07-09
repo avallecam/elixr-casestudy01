@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r,echo=TRUE,warning=FALSE,message=FALSE}
 library(tidyverse)
+theme_set(theme_bw())
 ```
 
 # import plates in long-format
