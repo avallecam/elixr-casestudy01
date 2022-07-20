@@ -261,6 +261,7 @@ data9 <- data4 %>%
 # only std + density ~ abunits
 data5 %>% write_rds("data/02-data-standard_curve.rds") 
 # data6 # only ctrl
+data6 %>% write_rds("data/02-data-only_control.rds") 
 # samples and ctrl with stat measurements per code
 data7 %>% write_rds("data/02-data-ab_mean.rds") 
 # data8 # outliers if any
