@@ -38,8 +38,8 @@ data_abmean <- read_rds("data/02-data-ab_mean.rds")
 # fit 4pll model
 
 ```{r}
-mab_ir <- NULL
-mod_bx <- NULL
+# mab_ir <- NULL
+# mod_bx <- NULL
 j <- 1
 ```
 
@@ -66,10 +66,19 @@ data_drm_ctrl <- data_ctrl %>%
   identity()
 ```
 
+```{r}
+data_drc_abmean <- data_abmean %>% 
+  filter(plate==unique(data_ctrl$plate)[j]) %>% 
+  filter(experimento==unique(data_ctrl$experimento)[j]) %>% 
+  # mutate(plate=as.factor(plate)) %>% 
+  # as.data.frame() %>% 
+  identity()
+```
+
 
 ## dose response model
 
-```{r,eval=FALSE}
+```{r}
 # one plate experiment
 wb.model <- 
   drm(formula = densidad ~ abunits, 
@@ -80,116 +89,43 @@ wb.model <-
 #' "c" -> "Lower Limit", 
 #' "d" -> "Upper Limit", 
 #' "e" -> "ED50"
+```
 
+## tidy model output
+
+```{r}
 wb.model %>% broom::tidy()
 wb.model %>% broom::glance()
 # wb.model %>% pluck("data")
-```
-
-```{r,warning=FALSE}
-# multiple plate experiment
-data_drm_models <- 
-  data_stdc %>%
-  # data_drm_stdc %>%
-  group_by(plate,experimento) %>% 
-  nest() %>% 
-  ungroup() %>% 
-  mutate(fit = 
-           map(.x = data, 
-               .f = ~drm(formula = densidad ~ abunits, 
-                         # curveid = plate,
-                         data= .x,
-                         fct = LL.4(names = c("b", "c", "d", "e")))
-               )
-         ) %>% 
-  # mutate(fit_tidy = map(.x = fit,.f = broom::tidy)) %>% 
-  # mutate(fit_glance = map(.x = fit,.f = broom::glance)) %>% 
-  identity()
-
-data_drm_models
-# data_drm_models %>% 
-#   unnest(cols = fit_tidy)
-# data_drm_models %>% 
-#   unnest(cols = fit_glance)
 ```
 
 ## box-cox transformation
 
 BOX-COX TRANSFORMATION against RESIDUAL heterogeneity
 
-```{r,eval=FALSE}
+```{r,warning=FALSE}
 # only one plate
 
 wb.model.BX <- 
   boxcox(object = wb.model, 
          # main=expression("Optimal " ~ lambda ~ " with confidence intervals"), 
          plotit = FALSE)
+```
 
+## tidy model output
+
+```{r}
 wb.model.BX %>% broom::tidy()
 ```
 
-```{r,warning=FALSE}
-# for multiple plates
 
-data_output <- tibble()
-
-for (i in 1:nrow(data_drm_models)) {
-  
-  test01 <- data_drm_models %>% 
-    # dplyr::select(plate,experimento,data,fit) %>% 
-    slice(i)
-  
-  .x <- test01 %>%
-    pull(data) %>%
-    pluck(1)
-  
-  test02 <- test01 %>%
-    pull(fit) %>%
-    pluck(1) %>%
-    # class()
-    boxcox(object = .,plotit = FALSE)
-  
-  test03 <- tibble(fit_boxcox = list(test02))
-  
-  test04 <- test01 %>% add_column(test03)
-  
-  data_output <- union_all(data_output,test04)
-  
-}
-
-data_output
-```
-
-```{r}
-data_drm_models_tidy <- 
-  data_output %>% 
-  mutate(fit_tidy = map(.x = fit_boxcox,.f = broom::tidy)) %>%
-  mutate(fit_glance = map(.x = fit_boxcox,.f = broom::glance))
-
-data_drm_models_tidy %>%
-  unnest(cols = fit_tidy)
-data_drm_models_tidy %>%
-  unnest(cols = fit_glance)
-```
-
-
-## choose model
+If needed, choose the first model with:
 
 ```{r}
 # wb.model.BX <- wb.model
 ```
 
-## model parameters
-
-```{r,eval=FALSE}
-data_drm_param <- 
-  wb.model.BX %>% 
-  broom::tidy() %>% 
-  mutate(plate=unique(data_stdc$plate)[j]) %>% 
-  dplyr::select(plate,everything())
-```
-
-# plate model
+# predict the standard curve
 
 ## prediction and confidence interval
 
@@ -197,7 +133,7 @@ data_drm_param <-
 data_new <- expand.grid(exp(seq(log(0.1),log(2048),length=100)))
 ```
 
-```{r,eval=FALSE}
+```{r,warning=FALSE}
 # only one plate
 
 # predictions and confidence intervals
@@ -216,76 +152,37 @@ data_new_pred <- data_new %>%
 
 ```
 
+## result
 
-```{r,warning=FALSE}
-# multiple plates
-
-data_output_02 <- tibble()
-
-for (i in 1:nrow(data_drm_models_tidy)) { #i=1
-  
-  test11 <- data_drm_models_tidy %>% 
-    slice(i)
-  
-  test12 <- predict(object = test11 %>% 
-                      pull(fit_boxcox) %>% 
-                      pluck(1), 
-                    newdata = data_new, 
-                    interval = "confidence")
-  
-  test13 <- data_new %>% 
-    rownames_to_column() %>% 
-    left_join(
-      test12 %>% 
-        as_tibble() %>% 
-        rownames_to_column()) %>% 
-    # mutate(plate=unique(data_stdc$plate)[j]) %>% 
-    dplyr::rename(resp=Var1,p=Prediction,pmin=Lower,pmax=Upper) %>% 
-    dplyr::select(everything())
-  
-  test14 <- tibble(prediction = list(test13))
-  
-  test15 <- test11 %>% add_column(test14)
-  
-  data_output_02 <- union_all(data_output_02,test15)
-  
-}
-
-data_output_02
-
-```
-
-### result
-
-```{r,fig.height=10,fig.width=10}
-data_output_02_pred <- data_output_02 %>%
-  dplyr::select(plate,experimento,prediction) %>% 
-  unnest(cols = prediction)
-
+```{r,fig.height=4,fig.width=6,fig.align='center'}
 ggplot() +
-  geom_hline(data = data_ctrl,
+  geom_hline(data = data_drm_ctrl,
              mapping = aes(yintercept=densidad, color = codigo)) +
-  geom_ribbon(data = data_output_02_pred,
+    geom_ribbon(data = data_new_pred,
               mapping = aes(ymin = pmin, ymax = pmax, 
                             x = resp), fill = "grey70") +
-  geom_line(data = data_output_02_pred,
+  geom_line(data = data_new_pred,
             mapping = aes(x = resp,y = p)) +
-  geom_point(data = data_stdc,
+  geom_point(data = data_drm_stdc,
              mapping = aes(x = abunits,y = densidad)) +
   scale_x_log10() +
-  facet_wrap(~plate+experimento)
+  facet_wrap(~plate+experimento) +
+  labs(x = "Unidades de Anticuerpos",
+       y = "Densidad óptica")
 ```
 
-## estimate abunits
+# estimate abunits
 
 UNK AB.UNITS ESTIMATION by INVERSE REGRESSION [pending]
 
-```{r,eval=FALSE}
+## estimates and confidence intervals
+
+```{r,warning=FALSE}
 # only one plate
 
 data_ed_abunit <-
   ED(object = wb.model.BX,
-     respLev = data_ed_abmean %>% pull(densidad_mean),
+     respLev = data_drc_abmean %>% pull(densidad_mean),
      #j #wb_MEAN[1:n,5],
      type = "absolute",
      interval = "delta",
@@ -293,7 +190,7 @@ data_ed_abunit <-
      display = FALSE)
 
 data_abmean_abunit <-
-  data_ed_abmean %>%
+  data_drc_abmean %>%
   rownames_to_column() %>%
   left_join(
     data_ed_abunit %>%
@@ -303,120 +200,35 @@ data_abmean_abunit <-
   )
 ```
 
-```{r,warning=FALSE}
-# multiple plates
+## result
 
-data_abmean_nested <- data_abmean %>% 
-  group_by(plate,experimento) %>% 
-  nest() %>% 
-  ungroup()
-
-data_output_03 <- tibble()
-
-for (i in 1:nrow(data_output_02)) {#i=1
-  
-  test21 <- data_output_02 %>% 
-    slice(i)
-  
-  test22 <- data_abmean_nested %>% 
-    slice(i)
-  
-  test22_abmean <- test22 %>% 
-         pull(data) %>% 
-         pluck(1)
-  
-  test23 <-
-    ED(object = test21 %>% 
-         pull(fit_boxcox) %>% 
-         pluck(1),
-       respLev = test22_abmean %>% 
-         pull(densidad_mean),
-       #j #wb_MEAN[1:n,5],
-       type = "absolute",
-       interval = "delta",
-       #clevel = "Pfal",
-       display = FALSE)
-  
-  test24 <- test22_abmean %>%
-    rownames_to_column() %>%
-    left_join(
-      test23 %>%
-        as_tibble() %>%
-        rownames_to_column() %>%
-        janitor::clean_names()
-    )
-  
-  test25 <- tibble(estimation = list(test24))
-  
-  test26 <- test21 %>% add_column(test25)
-  
-  data_output_03 <- union_all(data_output_03,test26)
-  
-}
-
-data_output_03
-```
-
-### result
-
-```{r,fig.height=10,fig.width=10}
-data_output_03_abunit <- data_output_03 %>%
-  dplyr::select(plate,experimento,estimation) %>% 
-  unnest(cols = estimation)
-
+```{r,fig.height=4,fig.width=6,fig.align='center'}
 ggplot() +
-  geom_hline(data = data_ctrl,
+  geom_hline(data = data_drm_ctrl,
              mapping = aes(yintercept=densidad, color = codigo)) +
-  geom_ribbon(data = data_output_02_pred,
+  geom_ribbon(data = data_new_pred,
               mapping = aes(ymin = pmin, ymax = pmax, 
                             x = resp), fill = "grey70") +
-  geom_line(data = data_output_02_pred,
+  geom_line(data = data_new_pred,
             mapping = aes(x = resp,y = p)) +
   geom_point(mapping = aes(x = estimate,y = densidad_mean),
-             data = data_output_03_abunit) +
+             data = data_abmean_abunit) +
   geom_errorbar(mapping = aes(x = estimate,y = densidad_mean,
                     xmin = lower, xmax = upper),
-                data = data_output_03_abunit) +
+                data = data_abmean_abunit) +
   scale_x_log10() +
-  facet_wrap(~plate+experimento)
+  facet_wrap(~plate+experimento) +
+  labs(x = "Unidades de Anticuerpos",
+       y = "Densidad óptica")
 ```
 
 # outputs
 
 ```{r}
-data_output_03 %>% 
-  write_rds("data/03-data-ab_units-complete.rds")
-
-data_output_03_abunit %>% 
-  writexl::write_xlsx("data/03-data-ab_units-only.xlsx")
+# data_abmean_abunit
 ```
 
+# references
 
-<!-- ```{r, eval=FALSE} -->
-<!-- # -->
-<!-- #fin -->
-<!-- #end -->
-<!-- #mod -->
-<!-- #data_abmean -->
-
-<!-- # standard curve data -->
-<!-- data_stdc -->
-
-<!-- # estimated ab unit data -->
-<!-- data_abmean_abunit -->
-
-<!-- # estimated parameters per standard curve -->
-<!-- data_drm_param -->
-
-<!-- # predicted model per standard curve  -->
-<!-- data_new_pred -->
-<!-- ``` -->
-
-# iterative modeling
-
-- [x] overlap standard curve plate points with model
-- [x] replicate the ggplot2 aesthetic from reference
-- [x] use purrr to model to all stratas
-- [ ] identify the reference code for classification!
 - review https://rstats4ag.org/dose-response-curves.html
 - review https://bioassay.dk/

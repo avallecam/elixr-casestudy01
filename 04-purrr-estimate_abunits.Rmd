@@ -26,7 +26,6 @@ pacman::p_load(drc)
 options(scipen=10000)
 ```
 
-
 # import input data
 
 ```{r}
@@ -36,36 +35,6 @@ data_abmean <- read_rds("data/02-data-ab_mean.rds")
 ```
 
 # fit 4pll model
-
-```{r}
-mab_ir <- NULL
-mod_bx <- NULL
-j <- 1
-```
-
-
-## get data
-
-```{r}
-data_drm_stdc <- data_stdc %>% 
-  filter(plate==unique(data_stdc$plate)[j]) %>% 
-  filter(experimento==unique(data_stdc$experimento)[j]) %>% 
-  # mutate(plate=as.factor(plate)) %>% 
-  # as.data.frame() %>% 
-  identity()
-# data_drm_stdc %>% class()
-# data_drm_stdc
-```
-
-```{r}
-data_drm_ctrl <- data_ctrl %>% 
-  filter(plate==unique(data_ctrl$plate)[j]) %>% 
-  filter(experimento==unique(data_ctrl$experimento)[j]) %>% 
-  # mutate(plate=as.factor(plate)) %>% 
-  # as.data.frame() %>% 
-  identity()
-```
-
 
 ## dose response model
 
@@ -160,6 +129,8 @@ for (i in 1:nrow(data_drm_models)) {
 data_output
 ```
 
+## tidy model outputs
+
 ```{r}
 data_drm_models_tidy <- 
   data_output %>% 
@@ -172,24 +143,7 @@ data_drm_models_tidy %>%
   unnest(cols = fit_glance)
 ```
 
-
-## choose model
-
-```{r}
-# wb.model.BX <- wb.model
-```
-
-## model parameters
-
-```{r,eval=FALSE}
-data_drm_param <- 
-  wb.model.BX %>% 
-  broom::tidy() %>% 
-  mutate(plate=unique(data_stdc$plate)[j]) %>% 
-  dplyr::select(plate,everything())
-```
-
-# plate model
+# predict the standard curve
 
 ## prediction and confidence interval
 
@@ -255,7 +209,7 @@ data_output_02
 
 ```
 
-### result
+## result
 
 ```{r,fig.height=10,fig.width=10}
 data_output_02_pred <- data_output_02 %>%
@@ -273,12 +227,16 @@ ggplot() +
   geom_point(data = data_stdc,
              mapping = aes(x = abunits,y = densidad)) +
   scale_x_log10() +
-  facet_wrap(~plate+experimento)
+  facet_wrap(~plate+experimento) +
+  labs(x = "Unidades de Anticuerpos",
+       y = "Densidad óptica")
 ```
 
-## estimate abunits
+# estimate abunits
 
 UNK AB.UNITS ESTIMATION by INVERSE REGRESSION [pending]
+
+## estimates and confidence intervals
 
 ```{r,eval=FALSE}
 # only one plate
@@ -357,7 +315,7 @@ for (i in 1:nrow(data_output_02)) {#i=1
 data_output_03
 ```
 
-### result
+## result
 
 ```{r,fig.height=10,fig.width=10}
 data_output_03_abunit <- data_output_03 %>%
@@ -378,7 +336,9 @@ ggplot() +
                     xmin = lower, xmax = upper),
                 data = data_output_03_abunit) +
   scale_x_log10() +
-  facet_wrap(~plate+experimento)
+  facet_wrap(~plate+experimento) +
+  labs(x = "Unidades de Anticuerpos",
+       y = "Densidad óptica")
 ```
 
 # outputs
@@ -390,27 +350,6 @@ data_output_03 %>%
 data_output_03_abunit %>% 
   writexl::write_xlsx("data/03-data-ab_units-only.xlsx")
 ```
-
-
-<!-- ```{r, eval=FALSE} -->
-<!-- # -->
-<!-- #fin -->
-<!-- #end -->
-<!-- #mod -->
-<!-- #data_abmean -->
-
-<!-- # standard curve data -->
-<!-- data_stdc -->
-
-<!-- # estimated ab unit data -->
-<!-- data_abmean_abunit -->
-
-<!-- # estimated parameters per standard curve -->
-<!-- data_drm_param -->
-
-<!-- # predicted model per standard curve  -->
-<!-- data_new_pred -->
-<!-- ``` -->
 
 # iterative modeling
 
