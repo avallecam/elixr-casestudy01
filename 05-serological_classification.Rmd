@@ -17,9 +17,9 @@ knitr::opts_chunk$set(echo = TRUE)
 # packages
 
 ```{r,echo=TRUE,warning=FALSE,message=FALSE}
-if(!require(pacman)) install.packages("pacman")
-pacman::p_load(tidyverse)
-pacman::p_load(drc)
+if(!require(pak)) install.packages("pak")
+pak::p_load(tidyverse)
+pak::p_load(drc)
 ```
 
 ```{r}
