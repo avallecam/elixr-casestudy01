@@ -7,7 +7,7 @@ output:
     toc_float: true
     code_folding: hide
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -17,8 +17,12 @@ knitr::opts_chunk$set(echo = TRUE)
 # packages
 
 ```{r,echo=TRUE,warning=FALSE,message=FALSE}
-library("tidyverse")
-library("drc")
+library(tidyverse)
+library(drc)
+library(patchwork)
+library(conflicted)
+conflicts_prefer(dplyr::select)
+conflicts_prefer(dplyr::filter)
 ```
 
 ```{r}
@@ -32,14 +36,65 @@ data_output_03 <- read_rds("data/03-data-ab_units-complete.rds")
 ```
 
 ```{r}
-data_output_03
+data_output_03_abunit <- data_output_03 %>%
+  dplyr::select(plate,experimento,estimation) %>% 
+  unnest(cols = estimation) %>% 
+  
+  # extra code for clear unification
+  mutate(experimento = case_when(
+    experimento == "igg" ~ "igg_______",
+    experimento == "igg-avidez" ~ "igg_avidez",
+    TRUE ~ experimento)) %>% 
+  mutate(unique_id = paste0(plate,"-",experimento,"-",codigo))
+```
+
+```{r}
+# data_output_03
+data_output_03_abunit
+```
+
+## reminder
+
+observations are unique when combining `plate`, `experimento`, `codigo`:
+
+```{r}
+data_output_03_abunit %>% 
+  filter(str_detect(codigo,"ctrl_")) %>% 
+  filter(magrittr::is_in(plate,c("placa_001","placa_002"))) %>% 
+  select(unique_id)
 ```
 
 # serological classification
 
 ## antibody distributions across samples
 
-```{r}
+```{r,fig.height=5,fig.width=10}
+fig01_a <- data_output_03_abunit %>% 
+  ggplot(aes(x = estimate)) +
+  geom_density(alpha=.5, 
+               position = "identity") +
+  geom_histogram(aes(y = after_stat(density)),
+                 bins = 60,
+                 alpha=.5, 
+                 position = "identity") +
+  #theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title="AU linear distribution")
 
+fig01_b <- data_output_03_abunit %>% 
+  ggplot(aes(sample = estimate)) +
+  geom_qq(alpha=.2) +
+  geom_qq_line(line.p = c(0.25, 0.75)) +
+  labs(title="Gaussian quantile-quantile plot") +
+  coord_cartesian(ylim = c(0,2000))
+
+fig01_a + fig01_b
+```
+
+## apply `mixtools` package
+
+source in blog post about [Using Mixture Models for Clustering](https://tinyheero.github.io/2015/10/13/mixture-model.html)
+
+```{r}
+# data_output_03_abunit
 ```
 
