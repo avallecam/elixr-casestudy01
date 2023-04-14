@@ -17,10 +17,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ## packages
 
 ```{r,echo=TRUE,warning=FALSE,message=FALSE}
-if(!require(pak)) install.packages("pak")
-pak::pak(tidyverse)
-pak::pak(readxl)
-pak::pak(plater)
+library(tidyverse)
+library(readxl)
+library(plater)
 ```
 
 

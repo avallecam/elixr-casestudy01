@@ -17,9 +17,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # packages
 
 ```{r,echo=TRUE,warning=FALSE,message=FALSE}
-if(!require(pak)) install.packages("pak")
-pak::p_load(tidyverse)
-pak::p_load(drc)
+library("tidyverse")
+library("drc")
 ```
 
 ```{r}
@@ -37,6 +36,8 @@ data_output_03
 ```
 
 # serological classification
+
+## antibody distributions across samples
 
 ```{r}
 
