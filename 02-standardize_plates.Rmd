@@ -17,7 +17,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # packages
 
 ```{r,echo=TRUE,warning=FALSE,message=FALSE}
-library(tidyverse)
+if(!require(pak)) install.packages("pak")
+pak::pak(tidyverse)
 theme_set(theme_bw())
 ```
 
