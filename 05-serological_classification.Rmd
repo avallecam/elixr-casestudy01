@@ -1,0 +1,44 @@
+---
+title: "05-serological_classification"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# packages
+
+```{r,echo=TRUE,warning=FALSE,message=FALSE}
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse)
+pacman::p_load(drc)
+```
+
+```{r}
+options(scipen=10000)
+```
+
+# import input data
+
+```{r}
+data_output_03 <- read_rds("data/03-data-ab_units-complete.rds")
+```
+
+```{r}
+data_output_03
+```
+
+# serological classification
+
+```{r}
+
+```
+
