@@ -35,40 +35,46 @@ options(scipen=10000)
 data_output_03 <- read_rds("data/03-data-ab_units-complete.rds")
 ```
 
+## extract antibody units estimates
+
 ```{r}
 data_output_03_abunit <- data_output_03 %>%
   dplyr::select(plate,experimento,estimation) %>% 
   unnest(cols = estimation) %>% 
   
-  # extra code for clear unification
-  mutate(experimento = case_when(
-    experimento == "igg" ~ "igg_______",
-    experimento == "igg-avidez" ~ "igg_avidez",
-    TRUE ~ experimento)) %>% 
-  mutate(unique_id = paste0(plate,"-",experimento,"-",codigo))
+  # extra code to create unique id
+  mutate(unique_id = paste0(#experimento,"-",
+                            plate,"-",codigo))
+```
+
+```{r,eval=FALSE,echo=FALSE}
+# data_output_03
+# data_output_03_abunit %>% 
+#   filter(experimento!="igg_______") %>% 
+#   distinct(plate,codigo)
 ```
 
 ```{r}
-# data_output_03
-data_output_03_abunit
+data_output_03_abunit %>% rmarkdown::paged_table()
 ```
 
 ## reminder
 
-observations are unique when combining `plate`, `experimento`, `codigo`:
+observations are unique when stratified by `experimento` and combined by `plate`, `codigo`:
 
 ```{r}
 data_output_03_abunit %>% 
   filter(str_detect(codigo,"ctrl_")) %>% 
   filter(magrittr::is_in(plate,c("placa_001","placa_002"))) %>% 
-  select(unique_id)
+  select(experimento,unique_id) %>% 
+  arrange(experimento)
 ```
 
-# serological classification
+# explore data
 
-## antibody distributions across samples
+## antibody distribution in sample
 
-```{r,fig.height=5,fig.width=10}
+```{r,fig.height=6,fig.width=6,warning=FALSE}
 fig01_a <- data_output_03_abunit %>% 
   ggplot(aes(x = estimate)) +
   geom_density(alpha=.5, 
@@ -77,6 +83,7 @@ fig01_a <- data_output_03_abunit %>%
                  bins = 60,
                  alpha=.5, 
                  position = "identity") +
+  facet_grid(~experimento,scales = "free") +
   #theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(title="AU linear distribution")
 
@@ -84,17 +91,77 @@ fig01_b <- data_output_03_abunit %>%
   ggplot(aes(sample = estimate)) +
   geom_qq(alpha=.2) +
   geom_qq_line(line.p = c(0.25, 0.75)) +
+  facet_grid(~experimento,scales = "free") +
   labs(title="Gaussian quantile-quantile plot") +
   coord_cartesian(ylim = c(0,2000))
 
-fig01_a + fig01_b
+fig01_a / fig01_b
 ```
 
-## apply `mixtools` package
-
-source in blog post about [Using Mixture Models for Clustering](https://tinyheero.github.io/2015/10/13/mixture-model.html)
+## identify missing values
 
 ```{r}
-# data_output_03_abunit
+data_output_03_abunit %>% 
+  select(experimento,unique_id,estimate) %>% 
+  naniar::vis_miss()
 ```
+
+
+# fit a gaussian mixture model
+
+Use `mixtools` package following the blog post about [Using Mixture Models for Clustering](https://tinyheero.github.io/2015/10/13/mixture-model.html)
+
+Use it for two `experimento` and at least two `k-component` variations `k=2` and `k=3`
+
+## for one strata
+
+```{r}
+data_output_03_abunit %>% 
+  select(experimento,estimate) %>% 
+  filter(!is.na(estimate)) %>% 
+  filter(experimento=="igg") %>% 
+  pull(estimate) %>% 
+  normalmixEM(k=2) %>% 
+  class()
+```
+
+## for all stratas and all components
+
+```{r}
+model_output_01 <- data_output_03_abunit %>% 
+  # filter(experimento=="igg") %>% 
+  select(experimento,unique_id,estimate) %>% 
+  filter(!is.na(estimate)) %>% 
+  group_by(experimento) %>% 
+  nest() %>% 
+  ungroup() %>%
+  mutate(estimates = map(data,pull,estimate)) %>% 
+  # expand the grid by the combination of k components
+  expand_grid(component_n = 2:5) %>%
+  mutate(mixture_model = 
+           pmap(.l = 
+                  select(
+                    .,
+                    x = estimates,
+                    k = component_n
+                  ),
+                .f = normalmixEM)) %>% 
+  # extract the log likelihood
+  mutate(loglikelihood = map_dbl(mixture_model,pluck,"loglik")) %>% 
+  # compute the aic
+  mutate(aic=2*component_n-2*loglikelihood) %>% 
+  group_by(experimento) %>% 
+  mutate(aic_difference = aic - dplyr::lag(aic)) %>% 
+  ungroup()
+
+model_output_01
+```
+
+## inspect model performance
+
+```{r}
+model_output_01 %>% 
+  select(experimento,component_n,loglikelihood,aic,aic_difference)
+```
+
 
