@@ -255,3 +255,43 @@ data.frame(x = model_avi_k3$x) %>%
   stat_mixture(model_name = model_avi_k3,k_component = 3,colour = "green")
 ```
 
+# classify seropositivity
+
+## classify samples
+
+```{r}
+u <- 0.90 # 90% classification probability
+
+mixmdl <- model_avi_k3
+
+post.df <- as_tibble(cbind(x = mixmdl$x, mixmdl$posterior)) %>% 
+  mutate(comp.12=comp.1+comp.2) %>% # sum probabilities of s+ and s++
+  mutate(label = ifelse(comp.3 > u, "s-", 
+                        ifelse(comp.12 > u, "s+", "s0"
+                               #ifelse(comp.1 > u,"s++","s0")
+                               ))) %>% 
+  mutate(label=forcats::fct_relevel(label,"s-","s0","s+"#,"s++"
+                                    ))
+s <- post.df %>% 
+  ggplot(aes(x = factor(label))) +
+  geom_bar() +
+  xlab("Component") +
+  ylab("Number of Data Points") +
+  labs(title="Classification")
+###
+t <- post.df %>% 
+  ggplot() +
+  #geom_line(aes(x,comp.1), colour="green", lwd = 1.5) +
+  #geom_line(aes(x,comp.2), colour="blue", lwd = 1.5) +
+  geom_line(aes(x,comp.12), colour="blue", lwd = 1.5) +
+  geom_line(aes(x,comp.3), colour="red", lwd = 1.5) +
+  geom_hline(yintercept = u, col = "black") +
+  #geom_vline(xintercept = cutoffs[2], col = "black", lty=3) +
+  #geom_vline(xintercept = cutoffs[1], col = "black", lty=3) +
+  xlab("Ab.units") +
+  ylab("classification probability") +
+  labs(title="Cutoff")
+
+s + t
+```
+
