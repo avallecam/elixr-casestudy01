@@ -135,14 +135,14 @@ model_output_01 <- data_output_03_abunit %>%
   group_by(experimento) %>% 
   nest() %>% 
   ungroup() %>%
-  mutate(estimates = map(data,pull,estimate)) %>% 
+  mutate(estimate_strata = map(data,pull,estimate)) %>% 
   # expand the grid by the combination of k components
   expand_grid(component_n = 2:5) %>%
   mutate(mixture_model = 
            pmap(.l = 
                   select(
                     .,
-                    x = estimates,
+                    x = estimate_strata,
                     k = component_n
                   ),
                 .f = normalmixEM)) %>% 
@@ -157,7 +157,7 @@ model_output_01 <- data_output_03_abunit %>%
 model_output_01
 ```
 
-## inspect model performance
+## summary of model performance
 
 ```{r}
 model_output_01 %>% 
@@ -180,7 +180,7 @@ plot_mix_comps <- function(x, mu, sigma, lam) {
   lam * dnorm(x, mu, sigma)
 }
 
-stat_mixture <- function(model_name, k_component = 1, colour) {
+stat_mixture <- function(model_name, k_component, colour) {
   stat_function(geom = "line", fun = plot_mix_comps,
                 args = list(model_name$mu[k_component], 
                             model_name$sigma[k_component], 
@@ -189,75 +189,219 @@ stat_mixture <- function(model_name, k_component = 1, colour) {
 }
 ```
 
+components distributions equivalent to multiple latent seropositive states:
+
+| component|     color|     state|
+|:---------|:---------|:---------|
+|    comp.1|       red|        s-|
+|    comp.2|      blue|        s+|
+|    comp.3|     green|       s++|
+
 ### experiment 1
 
-```{r,fig.height=4,fig.width=4}
+```{r}
 model_igg_k2 <- model_output_01 %>% 
   filter(experimento == "igg",
          component_n == 2) %>% 
   pull(mixture_model) %>% 
   pluck(1)
 
-data.frame(x = model_igg_k2$x) %>%
+fig02a <- data.frame(x = model_igg_k2$x) %>%
   ggplot() +
   geom_histogram(aes(x, after_stat(density)), 
-                 alpha=.5,position = "identity") +
+                 bins = 30,
+                 alpha=.5,
+                 position = "identity") +
   stat_mixture(model_name = model_igg_k2,k_component = 1,colour = "red") +
   stat_mixture(model_name = model_igg_k2,k_component = 2,colour = "blue")
 ```
 
-```{r,fig.height=4,fig.width=4}
+```{r}
 model_igg_k3 <- model_output_01 %>% 
   filter(experimento == "igg",
          component_n == 3) %>% 
   pull(mixture_model) %>% 
   pluck(1)
 
-data.frame(x = model_igg_k3$x) %>%
+fig02b <- data.frame(x = model_igg_k3$x) %>%
   ggplot() +
   geom_histogram(aes(x, after_stat(density)), 
-                 alpha=.5,position = "identity") +
+                 bins = 30,
+                 alpha=.5,
+                 position = "identity") +
   stat_mixture(model_name = model_igg_k3,k_component = 1,colour = "red") +
   stat_mixture(model_name = model_igg_k3,k_component = 2,colour = "blue") +
   stat_mixture(model_name = model_igg_k3,k_component = 3,colour = "green")
 ```
 
+```{r,fig.height=3,fig.width=7}
+fig02a + fig02b
+```
+
 ### experiment 2
 
-```{r,fig.height=4,fig.width=4}
+```{r}
 model_avi_k2 <- model_output_01 %>% 
   filter(experimento == "igg-avidez",
          component_n == 2) %>% 
   pull(mixture_model) %>% 
   pluck(1)
 
-data.frame(x = model_avi_k2$x) %>%
+fig03a <- data.frame(x = model_avi_k2$x) %>%
   ggplot() +
   geom_histogram(aes(x, after_stat(density)), 
-                 alpha=.5,position = "identity") +
+                 bins = 30,
+                 alpha=.5,
+                 position = "identity") +
   stat_mixture(model_name = model_avi_k2,k_component = 1,colour = "red") +
   stat_mixture(model_name = model_avi_k2,k_component = 2,colour = "blue")
 ```
 
-```{r,fig.height=4,fig.width=4}
+```{r}
 model_avi_k3 <- model_output_01 %>% 
   filter(experimento == "igg-avidez",
          component_n == 3) %>% 
   pull(mixture_model) %>% 
   pluck(1)
 
-data.frame(x = model_avi_k3$x) %>%
+fig03b <- data.frame(x = model_avi_k3$x) %>%
   ggplot() +
   geom_histogram(aes(x, after_stat(density)), 
-                 alpha=.5,position = "identity") +
+                 bins = 30,
+                 alpha=.5,
+                 position = "identity") +
   stat_mixture(model_name = model_avi_k3,k_component = 1,colour = "red") +
   stat_mixture(model_name = model_avi_k3,k_component = 2,colour = "blue") +
   stat_mixture(model_name = model_avi_k3,k_component = 3,colour = "green")
 ```
 
+```{r,fig.height=3,fig.width=7}
+fig03a + fig03b
+```
+
+
 # classify seropositivity
 
-## classify samples
+## classify using threshhold
+
+```{r}
+class_probability <- 0.90
+
+data_output_04 <- model_output_01 %>% 
+  filter(magrittr::is_in(component_n,c(2,3))) %>% 
+  select(experimento,data,component_n,mixture_model) %>% 
+  mutate(mixture_components = map(
+    .x = mixture_model,
+    .f = pluck, "posterior")) %>%
+  mutate(mixture_components = map(
+    .x = mixture_components, 
+    .f = as_tibble)) %>% 
+  select(-mixture_model) %>% 
+  unnest(cols = c(data,component_n,mixture_components)) %>% 
+  # # quality control
+  # count(experimento,component_n)
+  # rowwise to securily sum numbers removing missing values
+  rowwise() %>% 
+  mutate(comp.23 = sum(c_across(cols = c(comp.2,comp.3)),na.rm = T)) %>% 
+  ungroup() %>% 
+  mutate(class = case_when(
+    comp.1 > class_probability ~ "s-",
+    comp.2 > class_probability ~ "s+",
+    comp.3 > class_probability ~ "s++",
+    TRUE ~ "s0"
+  )) %>% 
+  mutate(class_two = case_when(
+    comp.1 > class_probability ~ "s-",
+    comp.23 > class_probability ~ "s+",
+    TRUE ~ "s0"
+  )) %>% 
+  mutate(class = fct_relevel(class, "s-","s0","s+","s++")) %>% 
+  mutate(class_two = fct_relevel(class_two, "s-","s0","s+"))
+
+data_output_04
+```
+
+```{r,eval=FALSE,echo=FALSE}
+# quality control
+# all prob must sum 1
+data_output_04 %>% 
+  select(starts_with("comp.")) %>% 
+  rowwise() %>% 
+  mutate(sum = sum(c_across(cols = -comp.23),na.rm = T)) %>% 
+  ungroup() %>% 
+  select(sum) %>% 
+  summary()
+```
+
+
+## summary of classification
+
+```{r}
+data_output_04 %>% 
+  count(experimento,component_n,class)
+
+data_output_04 %>% 
+  count(experimento,component_n,class_two)
+```
+
+## visualize classification
+
+### by distribution
+
+```{r,fig.height=5,fig.width=8}
+data_output_04 %>% 
+  ggplot(aes(x = estimate, 
+             fill = class, 
+             after_stat(density))) +
+  geom_histogram(binwidth = 50,
+                 alpha=.5,
+                 position = "identity") +
+  facet_wrap(~experimento+component_n,scales = "free")
+
+data_output_04 %>% 
+  ggplot(aes(x = estimate,
+             fill = class_two, 
+             after_stat(density))) +
+  geom_histogram(binwidth = 50,
+                 alpha=.5,
+                 position = "identity") +
+  facet_wrap(~experimento+component_n,scales = "free")
+```
+
+### by frecuency
+
+```{r,fig.height=5,fig.width=6}
+data_output_04 %>% 
+  ggplot(aes(x = class)) +
+  geom_bar() +
+  facet_wrap(~experimento+component_n)
+
+data_output_04 %>% 
+  ggplot(aes(x = class_two)) +
+  geom_bar() +
+  facet_wrap(~experimento+component_n)
+```
+
+### by classification probability
+
+```{r,fig.height=5,fig.width=6}
+data_output_04 %>% 
+  ggplot() +
+  geom_line(aes(x = estimate,y = comp.1), colour="red", lwd = 1.5) +
+  geom_line(aes(x = estimate,y = comp.2), colour="blue", lwd = 1.5) +
+  geom_line(aes(x = estimate,y = comp.3), colour="green", lwd = 1.5) +
+  geom_hline(yintercept = class_probability, col = "black") +
+  facet_wrap(~experimento+component_n,scales = "free")
+
+data_output_04 %>% 
+  ggplot() +
+  geom_line(aes(x = estimate,y = comp.1), colour="red", lwd = 1.5) +
+  geom_line(aes(x = estimate,y = comp.23), colour="blue", lwd = 1.5) +
+  geom_hline(yintercept = class_probability, col = "black") +
+  facet_wrap(~experimento+component_n,scales = "free")
+```
+
+### reference
 
 ```{r}
 u <- 0.90 # 90% classification probability
@@ -291,7 +435,9 @@ t <- post.df %>%
   xlab("Ab.units") +
   ylab("classification probability") +
   labs(title="Cutoff")
+```
 
+```{r,fig.height=3,fig.width=7}
 s + t
 ```
 
