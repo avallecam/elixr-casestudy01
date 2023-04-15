@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r,echo=TRUE,warning=FALSE,message=FALSE}
 library(tidyverse)
-library(drc)
+library(mixtools)
 library(patchwork)
 library(conflicted)
 conflicts_prefer(dplyr::select)
