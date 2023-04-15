@@ -165,3 +165,93 @@ model_output_01 %>%
 ```
 
 
+## visualize mixture model performance
+
+### function to plot mixture components
+
+```{r}
+#' Plot a Mixture Component
+#' 
+#' @param x Input data
+#' @param mu Mean of component
+#' @param sigma Standard deviation of component
+#' @param lam Mixture weight of component
+plot_mix_comps <- function(x, mu, sigma, lam) {
+  lam * dnorm(x, mu, sigma)
+}
+
+stat_mixture <- function(model_name, k_component = 1, colour) {
+  stat_function(geom = "line", fun = plot_mix_comps,
+                args = list(model_name$mu[k_component], 
+                            model_name$sigma[k_component], 
+                            lam = model_name$lambda[k_component]),
+                colour = colour, lwd = 1.5)
+}
+```
+
+### experiment 1
+
+```{r,fig.height=4,fig.width=4}
+model_igg_k2 <- model_output_01 %>% 
+  filter(experimento == "igg",
+         component_n == 2) %>% 
+  pull(mixture_model) %>% 
+  pluck(1)
+
+data.frame(x = model_igg_k2$x) %>%
+  ggplot() +
+  geom_histogram(aes(x, after_stat(density)), 
+                 alpha=.5,position = "identity") +
+  stat_mixture(model_name = model_igg_k2,k_component = 1,colour = "red") +
+  stat_mixture(model_name = model_igg_k2,k_component = 2,colour = "blue")
+```
+
+```{r,fig.height=4,fig.width=4}
+model_igg_k3 <- model_output_01 %>% 
+  filter(experimento == "igg",
+         component_n == 3) %>% 
+  pull(mixture_model) %>% 
+  pluck(1)
+
+data.frame(x = model_igg_k3$x) %>%
+  ggplot() +
+  geom_histogram(aes(x, after_stat(density)), 
+                 alpha=.5,position = "identity") +
+  stat_mixture(model_name = model_igg_k3,k_component = 1,colour = "red") +
+  stat_mixture(model_name = model_igg_k3,k_component = 2,colour = "blue") +
+  stat_mixture(model_name = model_igg_k3,k_component = 3,colour = "green")
+```
+
+### experiment 2
+
+```{r,fig.height=4,fig.width=4}
+model_avi_k2 <- model_output_01 %>% 
+  filter(experimento == "igg-avidez",
+         component_n == 2) %>% 
+  pull(mixture_model) %>% 
+  pluck(1)
+
+data.frame(x = model_avi_k2$x) %>%
+  ggplot() +
+  geom_histogram(aes(x, after_stat(density)), 
+                 alpha=.5,position = "identity") +
+  stat_mixture(model_name = model_avi_k2,k_component = 1,colour = "red") +
+  stat_mixture(model_name = model_avi_k2,k_component = 2,colour = "blue")
+```
+
+```{r,fig.height=4,fig.width=4}
+model_avi_k3 <- model_output_01 %>% 
+  filter(experimento == "igg-avidez",
+         component_n == 3) %>% 
+  pull(mixture_model) %>% 
+  pluck(1)
+
+data.frame(x = model_avi_k3$x) %>%
+  ggplot() +
+  geom_histogram(aes(x, after_stat(density)), 
+                 alpha=.5,position = "identity") +
+  stat_mixture(model_name = model_avi_k3,k_component = 1,colour = "red") +
+  stat_mixture(model_name = model_avi_k3,k_component = 2,colour = "blue") +
+  stat_mixture(model_name = model_avi_k3,k_component = 3,colour = "green")
+```
+
