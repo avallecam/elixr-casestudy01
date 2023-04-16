@@ -418,4 +418,7 @@ data_output_04 %>%
 - [ ] compare traditional vs data-base classification
 - [ ] replace density plots by automatic color based plots
 - [ ] remove redundant n=3 plots
-
+- [ ] add workflow to https://app.diagrams.net/#G1WQ_PMmH3x6JMVnYcSdkagbiA_kiOyBG3
+- ref: https://www.hindawi.com/journals/jir/2015/738030/
+- ref: https://github.com/avallecam/elixr/blob/master/00-appendix.Rmd
+- [ ] replace this 05-files workflow with the most simple univariate example --> data from https://malariajournal.biomedcentral.com/articles/10.1186/s12936-018-2471-6 
