@@ -7,7 +7,7 @@ output:
     toc_float: true
     code_folding: hide
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -99,7 +99,7 @@ wb.model.BX %>% broom::tidy()
 ```{r,warning=FALSE}
 # for multiple plates
 
-data_output <- tibble()
+data_output <- NULL
 
 for (i in 1:nrow(data_drm_models)) {
   
@@ -173,7 +173,7 @@ data_new_pred <- data_new %>%
 ```{r,warning=FALSE}
 # multiple plates
 
-data_output_02 <- tibble()
+data_output_02 <- NULL
 
 for (i in 1:nrow(data_drm_models_tidy)) { #i=1
   
@@ -268,7 +268,7 @@ data_abmean_nested <- data_abmean %>%
   nest() %>% 
   ungroup()
 
-data_output_03 <- tibble()
+data_output_03 <- NULL
 
 for (i in 1:nrow(data_output_02)) {#i=1
   
