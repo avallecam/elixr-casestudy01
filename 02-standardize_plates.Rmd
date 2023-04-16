@@ -282,4 +282,6 @@ data7 %>% write_rds("data/02-data-ab_mean.rds")
 # data9 # only samples and ctrl
 ```
 
+# to do list
 
+- [ ] create `std_reference` from data! flexible to any new situation
