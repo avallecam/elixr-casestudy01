@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r,echo=TRUE,warning=FALSE,message=FALSE}
 library(tidyverse)
+library(janitor)
 library(conflicted)
 conflicts_prefer(dplyr::select)
 conflicts_prefer(dplyr::filter)
@@ -30,18 +31,121 @@ options(scipen=10000)
 # import input data
 
 ```{r}
+data_output_03 <- read_rds("data/03-data-ab_units-complete.rds")
 data_output_05 <- read_rds("data/05-data-clasification-ab_units.rds")
 ```
 
 ```{r}
-data_output_05 %>% rmarkdown::paged_table()
+data_output_06 <- data_output_03 %>%
+  dplyr::select(plate,experimento,estimation) %>% 
+  unnest(cols = estimation) %>% 
+  
+  # extra code to create unique id
+  mutate(unique_id = paste0(#experimento,"-",
+                            plate,"--",codigo)) %>% 
+  left_join(
+    data_output_05 %>% 
+      select(experimento,unique_id,class)
+  ) %>% 
+  mutate(
+    class = fct_na_value_to_level(class,level = "s0")
+  )
+```
+
+```{r,eval=FALSE}
+# quality control
+data_output_05 %>% pull(class) %>% levels()
+data_output_06 %>% pull(class) %>% levels()
+data_output_06 %>% count(class)
+```
+
+```{r}
+data_output_06 %>% rmarkdown::paged_table()
 ```
 
 # use conventional classification
 
-Using un-standardized OD
-
 ```{r}
-
+data_output_07 <- data_output_06 %>% 
+  group_by(experimento,plate) %>% 
+  nest() %>% 
+  ungroup() %>% 
+  mutate(map_df(data,filter,codigo == "ctrl_negativo")) %>% 
+  # # quality control
+  # count(codigo)
+  # identity()
+  mutate(densidad_3sd = 3*densidad_sd) %>% 
+  mutate(estimate_3se = 3*std_error) %>% 
+  rowwise() %>% 
+  mutate(cutoff_conventional_od = sum(c_across(cols = c(densidad_mean,densidad_3sd)),na.rm = T)) %>% 
+  mutate(cutoff_conventional_au = sum(c_across(cols = c(estimate,estimate_3se)),na.rm = T)) %>% 
+  ungroup() %>% 
+  select(plate:data,
+         cutoff_conventional_od,
+         cutoff_conventional_au) %>% 
+  unnest(cols = data) %>% 
+  mutate(class_conventional_od = case_when(
+    densidad_mean <= cutoff_conventional_od ~ "s-",
+    densidad_mean > cutoff_conventional_od ~ "s+",
+    TRUE ~ "s0"
+  )) %>% 
+  mutate(class_conventional_au = case_when(
+    estimate <= cutoff_conventional_au ~ "s-",
+    estimate > cutoff_conventional_au ~ "s+",
+    TRUE ~ "s0"
+  ))
 ```
 
+```{r}
+data_output_07 %>% rmarkdown::paged_table()
+```
+
+
+# compare classification
+
+Assumptions:
+
+- Gold standard: GMM classification using standardized AU
+
+## use un-standardized OD
+
+```{r}
+data_output_07 %>%
+  count(experimento,class,class_conventional_od)
+```
+
+```{r}
+data_output_07 %>% 
+  tabyl(class_conventional_od,class,experimento)
+```
+
+## use standardized AU
+
+Here I drop the observations with `NaN` in AU estimation
+
+```{r}
+data_output_07 %>%
+  filter(!class_conventional_au=="s0") %>% 
+  count(experimento,class,class_conventional_au)
+```
+
+```{r}
+data_output_07 %>% 
+  filter(!class_conventional_au=="s0") %>% 
+  tabyl(class_conventional_au,class,experimento)
+```
+
+# outputs
+
+```{r}
+data_output_07 %>% 
+  write_rds("data/07-data-clasification-compare.rds")
+
+data_output_07 %>% 
+  writexl::write_xlsx("data/07-data-clasification-compare.xlsx")
+```
+
+# to do list
+
+- [x] move class `NA` to s0
+- [x] Try: Using standardized AU to create `ctrl_negative + 3*sd` conventional cutoff?
