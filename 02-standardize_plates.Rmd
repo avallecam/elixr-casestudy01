@@ -64,10 +64,10 @@ std_reference
 data5 <- data4 %>% 
   filter(str_detect(codigo,"STD")) %>% 
   left_join(std_reference,by = c("codigo"="dilution"))
+```
 
-data5 %>% 
-  # epihelper::print_inf() %>%
-  identity()
+```{r}
+data5 %>% rmarkdown::paged_table()
 ```
 
 ```{r}
