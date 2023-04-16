@@ -130,7 +130,7 @@ data_output_03_abunit %>%
 ```{r}
 model_output_01 <- data_output_03_abunit %>% 
   # filter(experimento=="igg") %>% 
-  select(experimento,unique_id,densidad_mean,estimate) %>% 
+  select(experimento,unique_id,densidad_replicate,densidad_mean,densidad_sd,estimate) %>% 
   # ojo: lost of sample of density values with missing estimates 
   filter(!is.na(estimate)) %>% 
   group_by(experimento) %>% 
