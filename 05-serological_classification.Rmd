@@ -44,7 +44,7 @@ data_output_03_abunit <- data_output_03 %>%
   
   # extra code to create unique id
   mutate(unique_id = paste0(#experimento,"-",
-                            plate,"-",codigo))
+                            plate,"--",codigo))
 ```
 
 ```{r,eval=FALSE,echo=FALSE}
@@ -130,7 +130,8 @@ data_output_03_abunit %>%
 ```{r}
 model_output_01 <- data_output_03_abunit %>% 
   # filter(experimento=="igg") %>% 
-  select(experimento,unique_id,estimate) %>% 
+  select(experimento,unique_id,densidad_mean,estimate) %>% 
+  # ojo: lost of sample of density values with missing estimates 
   filter(!is.na(estimate)) %>% 
   group_by(experimento) %>% 
   nest() %>% 
@@ -331,11 +332,15 @@ data_output_04 <- model_output_01 %>%
     TRUE ~ "s0"
   )) %>% 
   mutate(class = fct_relevel(class, "s-","s0","s+","s++")) %>% 
-  mutate(class_two = fct_relevel(class_two, "s-","s0","s+"))
+  mutate(class_two = fct_relevel(class_two, "s-","s0","s+")) %>% 
+  # separate the unique id in case useful for user
+  separate(col = unique_id,into = c("placa","codigo"),sep = "--",remove = F) %>% 
+  # send unique to the end
+  relocate(unique_id, .after = last_col())
 ```
 
-```{r}
-data_output_04 %>% rmarkdown::paged_table()
+```{r,eval=FALSE}
+data_output_04 #%>% rmarkdown::paged_table()
 ```
 
 ```{r,eval=FALSE,echo=FALSE}
@@ -418,11 +423,42 @@ data_output_04 %>%
   facet_wrap(~experimento+component_n,scales = "free")
 ```
 
+## select the model
+
+```{r}
+data_output_05 <- data_output_04 %>% 
+  filter(experimento == "igg" & component_n == 2 |
+           experimento == "igg-avidez" & component_n == 2)
+
+data_output_05 %>% 
+  count(experimento,component_n)
+```
+
+```{r}
+data_output_05 %>% rmarkdown::paged_table()
+```
+
+# outputs
+
+```{r}
+data_output_05 %>% 
+  write_rds("data/05-data-clasification-ab_units.rds")
+
+data_output_05 %>% 
+  writexl::write_xlsx("data/05-data-clasification-ab_units.xlsx")
+```
+
+# open questions
+
+- [ ] how to deal with uncertainty in the estimate and classification (which is only based on the point estimate currently)
+
 # to do list
 
 - [x] clean output data table number in components
-- [ ] export final table to user
+- [x] export final table to user
+- [x] create unique with uncommon (?) hash `--`
 - [ ] compare traditional vs data-base classification
+- [ ] replace `plot_mix_comps` with broom like function for tidy tibble model summary
 - [ ] replace density plots by automatic color based plots
 - [ ] remove redundant n=3 plots
 - [ ] add workflow to https://app.diagrams.net/#G1WQ_PMmH3x6JMVnYcSdkagbiA_kiOyBG3
