@@ -355,6 +355,10 @@ data_output_03_abunit %>%
 - [x] overlap standard curve plate points with model
 - [x] replicate the ggplot2 aesthetic from reference
 - [x] use purrr to model to all stratas
-- [ ] identify the reference code for classification!
+- [x] identify the reference code for classification!
 - review https://rstats4ag.org/dose-response-curves.html
 - review https://bioassay.dk/
+
+# questions
+
+- [ ] how to treat NaN's in drc output?
