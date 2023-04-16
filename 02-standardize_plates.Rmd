@@ -25,11 +25,12 @@ theme_set(theme_bw())
 
 ```{r}
 data4 <- read_rds("data/multiplate-long.rds")
-
-data4 %>% 
-  # epihelper::print_inf() %>% 
-  identity()
 ```
+
+```{r}
+data4 %>% rmarkdown::paged_table()
+```
+
 
 # create standardization dataframe
 
