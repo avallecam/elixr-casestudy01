@@ -144,20 +144,33 @@ data4 %>%
 
 ## replicate variability
 
+actions:
+
+- remove standard curve rows
+- summarized samples and control wells to mean, sd, and cv
+
 ```{r}
 data7 <- data4 %>% 
   # filter(!str_detect(codigo,"STD|ctrl")) %>% 
   filter(!str_detect(codigo,"STD")) %>% 
+  # here all replicates are summarized
+  # replicates from samples and controls
   group_by(plate,experimento,codigo) %>% 
-  summarise(densidad_mean=mean(densidad),
+  summarise(densidad_replicate = n(),
+            densidad_mean=mean(densidad),
             densidad_sd=sd(densidad)) %>% 
   ungroup() %>% 
   mutate(densidad_cv=100*densidad_sd/densidad_mean) %>% 
   # epihelper::print_inf() %>% 
   identity()
 
-data7
+# data7
 ```
+
+```{r}
+data7 %>% rmarkdown::paged_table()
+```
+
 
 ### identify outliers
 
