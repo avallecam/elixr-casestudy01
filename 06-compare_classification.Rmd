@@ -156,6 +156,18 @@ data_output_07 %>%
   tabyl(class_conventional_od,class_conventional_au,experimento)
 ```
 
+```{r}
+data_output_07 %>% 
+  filter(class_conventional_au=="s0" &
+           (class_conventional_od == "s+" | class_conventional_od == "s-")) %>% 
+  rmarkdown::paged_table()
+```
+
+<!-- # interactive table -->
+
+<!-- ```{r} -->
+<!-- DT::datatable(data_output_07) -->
+<!-- ``` -->
 
 # outputs
 
@@ -171,3 +183,4 @@ data_output_07 %>%
 
 - [x] move class `NA` to s0
 - [x] Try: Using standardized AU to create `ctrl_negative + 3*sd` conventional cutoff?
+- [ ] interactive table with filters within columns?
