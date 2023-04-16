@@ -466,14 +466,15 @@ data_output_05 %>%
 # open questions
 
 - [ ] how to deal with uncertainty in the estimate and classification (which is only based on the point estimate currently)
+- [ ] how to deal with missing values? current status: excluded from classification algorithm and final data output
 
 # to do list
 
 - [x] clean output data table number in components
 - [x] export final table to user
 - [x] create unique with uncommon (?) hash `--`
-- [ ] select one `class` column 
-- [ ] compare traditional vs data-base classification
+- [x] select one `class` column 
+- [ ] compare traditional vs data-base classification (new file)
 - [ ] add workflow to https://app.diagrams.net/#G1WQ_PMmH3x6JMVnYcSdkagbiA_kiOyBG3
 
 later
