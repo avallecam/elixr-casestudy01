@@ -426,7 +426,9 @@ data_output_04 %>%
   facet_wrap(~experimento+component_n,scales = "free")
 ```
 
-## select the model
+## select model 
+
+Select model by `k-component` and `k-labeling` column
 
 ```{r}
 data_output_05 <- data_output_04 %>% 
@@ -460,11 +462,15 @@ data_output_05 %>%
 - [x] clean output data table number in components
 - [x] export final table to user
 - [x] create unique with uncommon (?) hash `--`
+- [ ] select one `class` column 
 - [ ] compare traditional vs data-base classification
+- [ ] add workflow to https://app.diagrams.net/#G1WQ_PMmH3x6JMVnYcSdkagbiA_kiOyBG3
+
+later
+
 - [ ] replace `plot_mix_comps` with broom like function for tidy tibble model summary
 - [ ] replace density plots by automatic color based plots
 - [ ] remove redundant n=3 plots
-- [ ] add workflow to https://app.diagrams.net/#G1WQ_PMmH3x6JMVnYcSdkagbiA_kiOyBG3
 - ref: https://www.hindawi.com/journals/jir/2015/738030/
 - ref: https://github.com/avallecam/elixr/blob/master/00-appendix.Rmd
 - [ ] replace this 05-files workflow with the most simple univariate example --> data from https://malariajournal.biomedcentral.com/articles/10.1186/s12936-018-2471-6 
