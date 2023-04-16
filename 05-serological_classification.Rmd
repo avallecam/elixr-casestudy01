@@ -394,7 +394,7 @@ data_output_04 %>%
 
 ### by classification probability
 
-```{r,fig.height=5,fig.width=6}
+```{r,fig.height=5,fig.width=7}
 data_output_04 %>% 
   ggplot() +
   geom_line(aes(x = estimate,y = comp.1), colour="red", lwd = 1.5) +
