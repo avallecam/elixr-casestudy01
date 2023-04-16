@@ -33,6 +33,14 @@ data_ctrl <- read_rds("data/02-data-only_control.rds")
 data_abmean <- read_rds("data/02-data-ab_mean.rds") 
 ```
 
+```{r}
+data_stdc %>% rmarkdown::paged_table()
+```
+
+```{r}
+data_abmean %>% rmarkdown::paged_table()
+```
+
 # fit 4pll model
 
 ## dose response model
@@ -316,11 +324,18 @@ data_output_03
 
 ## result
 
-```{r,fig.height=10,fig.width=10}
+```{r}
 data_output_03_abunit <- data_output_03 %>%
   dplyr::select(plate,experimento,estimation) %>% 
   unnest(cols = estimation)
+```
 
+```{r}
+data_output_03_abunit %>% rmarkdown::paged_table()
+```
+
+
+```{r,fig.height=10,fig.width=10}
 ggplot() +
   geom_hline(data = data_ctrl,
              mapping = aes(yintercept=densidad, color = codigo)) +
