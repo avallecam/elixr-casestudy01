@@ -337,7 +337,7 @@ data_output_04 <- model_output_01 %>%
   mutate(class = fct_relevel(class, "s-","s0","s+","s++")) %>% 
   mutate(class_sum = fct_relevel(class_sum, "s-","s0","s+")) %>% 
   # separate the unique id in case useful for user
-  separate(col = unique_id,into = c("placa","codigo"),sep = "--",remove = F) %>% 
+  separate(col = unique_id,into = c("plate","codigo"),sep = "--",remove = F) %>% 
   # send unique to the end
   relocate(unique_id, .after = last_col())
 ```
