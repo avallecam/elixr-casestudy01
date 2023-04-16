@@ -290,11 +290,15 @@ fig03a + fig03b
 
 # classify seropositivity
 
-## classify using threshhold
+## define probability threshold
 
 ```{r}
 class_probability <- 0.90
+```
 
+## classify using threshhold
+
+```{r}
 data_output_04 <- model_output_01 %>% 
   filter(magrittr::is_in(component_n,c(2,3))) %>% 
   select(experimento,data,component_n,mixture_model) %>% 
