@@ -103,11 +103,10 @@ data_output_07 %>% rmarkdown::paged_table()
 
 # compare classification
 
-Assumptions:
+## comparison 1
 
 - Gold standard: GMM classification using standardized AU
-
-## use un-standardized OD
+- Comparison: Conventional classification using un-standardized OD
 
 ```{r}
 data_output_07 %>%
@@ -119,7 +118,10 @@ data_output_07 %>%
   tabyl(class_conventional_od,class,experimento)
 ```
 
-## use standardized AU
+## comparison 2
+
+- Gold standard: GMM classification using standardized AU
+- Comparison: Conventional classification using standardized AU
 
 Here I drop the observations with `NaN` in AU estimation
 
@@ -134,6 +136,26 @@ data_output_07 %>%
   filter(!class_conventional_au=="s0") %>% 
   tabyl(class_conventional_au,class,experimento)
 ```
+
+## comparison 3
+
+- Gold standard: Conventional classification using standardized AU
+- Comparison: Conventional classification using un-standardized OD
+
+Here I drop the observations with `NaN` in AU estimation
+
+```{r}
+data_output_07 %>%
+  # filter(!class_conventional_au=="s0") %>% 
+  count(experimento,class_conventional_od,class_conventional_au)
+```
+
+```{r}
+data_output_07 %>% 
+  # filter(!class_conventional_au=="s0") %>% 
+  tabyl(class_conventional_od,class_conventional_au,experimento)
+```
+
 
 # outputs
 
