@@ -310,6 +310,9 @@ data_output_04 <- model_output_01 %>%
     .f = as_tibble)) %>% 
   select(-mixture_model) %>% 
   unnest(cols = c(data,component_n,mixture_components)) %>% 
+  # for a clear number output
+  mutate(across(.cols = where(is.numeric),.fns = round, 8)) %>% 
+  # rmarkdown::paged_table()
   # # quality control
   # count(experimento,component_n)
   # rowwise to securily sum numbers removing missing values
@@ -417,7 +420,7 @@ data_output_04 %>%
 
 # to do list
 
-- [ ] clean output data table number in components
+- [x] clean output data table number in components
 - [ ] export final table to user
 - [ ] compare traditional vs data-base classification
 - [ ] replace density plots by automatic color based plots
