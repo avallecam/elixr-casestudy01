@@ -157,6 +157,14 @@ model_output_01 <- data_output_03_abunit %>%
 # model_output_01
 ```
 
+## criteria for model selection
+
+criteria to choose the number of `k-compartments` for a distribution:
+
+- not based only on AIC criteria, but also in visual inspection of the distribution
+- minimize the number of undetermined samples (`s0`)
+- closer resemblance to the expected number of positives
+
 ## summary of model performance
 
 ```{r}
