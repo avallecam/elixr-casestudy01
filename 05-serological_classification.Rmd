@@ -329,13 +329,13 @@ data_output_04 <- model_output_01 %>%
     comp.3 > class_probability ~ "s++",
     TRUE ~ "s0"
   )) %>% 
-  mutate(class_two = case_when(
+  mutate(class_sum = case_when(
     comp.1 > class_probability ~ "s-",
     comp.23 > class_probability ~ "s+",
     TRUE ~ "s0"
   )) %>% 
   mutate(class = fct_relevel(class, "s-","s0","s+","s++")) %>% 
-  mutate(class_two = fct_relevel(class_two, "s-","s0","s+")) %>% 
+  mutate(class_sum = fct_relevel(class_sum, "s-","s0","s+")) %>% 
   # separate the unique id in case useful for user
   separate(col = unique_id,into = c("placa","codigo"),sep = "--",remove = F) %>% 
   # send unique to the end
@@ -366,7 +366,7 @@ data_output_04 %>%
   count(experimento,component_n,class)
 
 data_output_04 %>% 
-  count(experimento,component_n,class_two)
+  count(experimento,component_n,class_sum)
 ```
 
 ## visualize classification
@@ -385,7 +385,7 @@ data_output_04 %>%
 
 data_output_04 %>% 
   ggplot(aes(x = estimate,
-             fill = class_two, 
+             fill = class_sum, 
              after_stat(density))) +
   geom_histogram(binwidth = 50,
                  alpha=.5,
@@ -402,7 +402,7 @@ data_output_04 %>%
   facet_wrap(~experimento+component_n)
 
 data_output_04 %>% 
-  ggplot(aes(x = class_two)) +
+  ggplot(aes(x = class_sum)) +
   geom_bar() +
   facet_wrap(~experimento+component_n)
 ```
