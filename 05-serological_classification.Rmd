@@ -428,12 +428,22 @@ data_output_04 %>%
 
 ## select model 
 
-Select model by `k-component` and `k-labeling` column
+First explore equivalent class labelling
+
+```{r}
+data_output_04 %>% 
+  filter(experimento == "igg" & component_n == 2 |
+           experimento == "igg-avidez" & component_n == 2) %>% 
+  count(experimento,class,class_sum)
+```
+
+Then, select model by `k-component` and `k-labeling` column
 
 ```{r}
 data_output_05 <- data_output_04 %>% 
   filter(experimento == "igg" & component_n == 2 |
-           experimento == "igg-avidez" & component_n == 2)
+           experimento == "igg-avidez" & component_n == 2) %>% 
+  select(-class_sum)
 
 data_output_05 %>% 
   count(experimento,component_n)
