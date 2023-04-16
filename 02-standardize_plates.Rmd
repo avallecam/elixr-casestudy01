@@ -270,7 +270,7 @@ data9 <- data4 %>%
   # filter(str_detect(codigo,"ctrl"))
 ```
 
-```{r,eval=FALSE}
+```{r}
 # data4 # all 
 # only std + density ~ abunits
 data5 %>% write_rds("data/02-data-standard_curve.rds") 
