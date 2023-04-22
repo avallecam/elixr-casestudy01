@@ -305,6 +305,8 @@ for (i in 1:nrow(data_output_02)) {#i=1
        #clevel = "Pfal",
        display = FALSE)
   
+  # create rowname column name
+  # useful only for joining two datasets
   test24 <- test22_abmean %>%
     rownames_to_column() %>%
     left_join(
@@ -312,7 +314,8 @@ for (i in 1:nrow(data_output_02)) {#i=1
         as_tibble() %>%
         rownames_to_column() %>%
         janitor::clean_names()
-    )
+    ) %>% 
+    dplyr::select(-rowname)
   
   test25 <- tibble(estimation = list(test24))
   
