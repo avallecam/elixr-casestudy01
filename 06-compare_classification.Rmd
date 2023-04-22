@@ -67,10 +67,17 @@ data_output_06 %>% rmarkdown::paged_table()
 
 ```{r}
 data_output_07 <- data_output_06 %>% 
-  group_by(experimento,plate) %>% 
+  # only by experiment, assuming comparability across plates
+  group_by(experimento) %>% 
   nest() %>% 
   ungroup() %>% 
-  mutate(map_df(data,filter,codigo == "ctrl_negativo")) %>% 
+  mutate(only_negatives = map(data,filter,codigo == "ctrl_negativo")) %>% 
+  unnest(cols = c(only_negatives)) %>% 
+  
+  # current status: NOT RUNNING!
+  # pending: summarize the population of negatives per
+  # alternative: treat all ctrl_negative as units, not as replicates
+  
   # # quality control
   # count(codigo)
   # identity()
