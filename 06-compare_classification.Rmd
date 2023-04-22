@@ -46,7 +46,7 @@ data_output_06 <- data_output_03 %>%
   left_join(
     data_output_05 %>% 
       select(experimento,unique_id,class)
-  ) %>% 
+  ) #%>% 
   # mutate(
     # class = fct_na_value_to_level(class,level = "s0")
   # )
