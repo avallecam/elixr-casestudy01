@@ -71,26 +71,31 @@ data_output_07 <- data_output_06 %>%
   group_by(experimento) %>% 
   nest() %>% 
   ungroup() %>% 
+  # task: summarize the population of negatives per experiment
+  # [not applied] alternative: treat all ctrl_negative as units, not as replicates
   mutate(only_negatives = map(data,filter,codigo == "ctrl_negativo")) %>% 
-  unnest(cols = c(only_negatives)) %>% 
-  
-  # current status: NOT RUNNING!
-  # pending: summarize the population of negatives per
-  # alternative: treat all ctrl_negative as units, not as replicates
+  # od
+  mutate(od_negatives = map(only_negatives,pull,densidad_mean)) %>% 
+  mutate(od_cutoff_mean = map_dbl(od_negatives,mean,na.rm = T)) %>% 
+  mutate(od_cutoff_sd = map_dbl(od_negatives,sd,na.rm = T)) %>% 
+  mutate(od_cutoff_3sd = 3*od_cutoff_sd) %>% 
+  # ab
+  mutate(au_negatives = map(only_negatives,pull,estimate)) %>% 
+  mutate(au_cutoff_mean = map_dbl(au_negatives,mean,na.rm = T)) %>% 
+  mutate(au_cutoff_sd = map_dbl(au_negatives,sd,na.rm = T)) %>% 
+  mutate(au_cutoff_3sd = 3*au_cutoff_sd) %>%
+  # end
+  group_by(experimento) %>% 
+  mutate(cutoff_conventional_od = sum(c_across(cols = c(od_cutoff_mean,od_cutoff_3sd)),na.rm = T)) %>% 
+  mutate(cutoff_conventional_au = sum(c_across(cols = c(au_cutoff_mean,au_cutoff_3sd)),na.rm = T)) %>% 
+  ungroup() %>%
+  select(-only_negatives,-od_negatives,-au_negatives) %>% 
+  unnest(cols = c(data)) %>%
   
   # # quality control
   # count(codigo)
   # identity()
-  mutate(densidad_3sd = 3*densidad_sd) %>% 
-  mutate(estimate_3se = 3*std_error) %>% 
-  rowwise() %>% 
-  mutate(cutoff_conventional_od = sum(c_across(cols = c(densidad_mean,densidad_3sd)),na.rm = T)) %>% 
-  mutate(cutoff_conventional_au = sum(c_across(cols = c(estimate,estimate_3se)),na.rm = T)) %>% 
-  ungroup() %>% 
-  select(plate:data,
-         cutoff_conventional_od,
-         cutoff_conventional_au) %>% 
-  unnest(cols = data) %>% 
+  
   mutate(class_conventional_od = case_when(
     densidad_mean <= cutoff_conventional_od ~ "s-",
     densidad_mean > cutoff_conventional_od ~ "s+",
