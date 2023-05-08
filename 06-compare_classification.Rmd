@@ -113,9 +113,9 @@ data_output_07 %>% rmarkdown::paged_table()
 ```
 
 
-# compare classification
+# explore comparison of classification
 
-## comparison 1
+## explore comparison 1
 
 - Gold standard: GMM classification using standardized AU
 - Comparison: Conventional classification using un-standardized OD
@@ -130,7 +130,39 @@ data_output_07 %>%
   tabyl(class_conventional_od,class,experimento)
 ```
 
-## comparison 2
+### igg
+
+- make careful interpretations of results bellow
+
+```{r}
+data_output_07 %>% 
+  filter(experimento == "igg") %>% 
+  filter(class != "s0") %>% 
+  filter(class != "s++") %>% 
+  select(class_conventional_od,class) %>% 
+  mutate(across(.cols = everything(),.fns = as.character)) %>% 
+  table() %>% 
+  caret::confusionMatrix("s+")
+```
+
+### igg-avidez
+
+- make careful interpretations of results bellow
+
+```{r}
+data_output_07 %>% 
+  filter(experimento == "igg-avidez") %>% 
+  filter(class != "s0") %>% 
+  filter(class != "s++") %>% 
+  select(class_conventional_od,class) %>% 
+  mutate(across(.cols = everything(),.fns = as.character)) %>% 
+  table() %>% 
+  caret::confusionMatrix("s+")
+```
+
+<!--
+
+## explore comparison 2
 
 - Gold standard: GMM classification using standardized AU
 - Comparison: Conventional classification using standardized AU
@@ -149,7 +181,7 @@ data_output_07 %>%
   tabyl(class_conventional_au,class,experimento)
 ```
 
-## comparison 3
+## explore comparison 3
 
 - Gold standard: Conventional classification using standardized AU
 - Comparison: Conventional classification using un-standardized OD
@@ -168,12 +200,17 @@ data_output_07 %>%
   tabyl(class_conventional_od,class_conventional_au,experimento)
 ```
 
+-->
+
+## explore data
+
 ```{r}
 data_output_07 %>% 
-  filter(class_conventional_au=="s0" &
+  filter(class_conventional_au == "s0" &
            (class_conventional_od == "s+" | class_conventional_od == "s-")) %>% 
   rmarkdown::paged_table()
 ```
+
 
 <!-- # interactive table -->
 
