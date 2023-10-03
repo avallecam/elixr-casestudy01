@@ -4,6 +4,10 @@
 .httr-oauth
 .DS_Store
 notrack/
-data/
-data-raw/
 *.html
+data-raw/data-test/*
+data-raw/*.xlsx
+data/*.rds
+data/*.xlsx
+data/*.rds
+data/*.csv
