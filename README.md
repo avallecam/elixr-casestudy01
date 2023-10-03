@@ -53,6 +53,17 @@ Please see our [Getting help guide](/.github/SUPPORT.md) for support.
 
 - [@avallecam](https://www.github.com/avallecam)
 
+## Acknowledgements
+
+Many thanks for the opportunity to work on this project to the team at:
+
+Laboratorio de Biología Molecular e Inmunología, Unidad Especializada de
+Investigación en Productos Naturales Antiparasitarios de la Amazonia,
+Centro de Investigación en Recursos Naturales
+([CIRNA](https://www.gob.pe/37761-universidad-nacional-de-la-amazonia-peruana-centro-de-investigaciones-de-recursos-naturales-de-la-unap-cirna-unap)),
+Universidad Nacional de la Amazonia Peruana
+([UNAP](https://enlinea.unapiquitos.edu.pe/)), Iquitos - Perú.
+
 ## References
 
 Miura K, Orcutt AC, Muratova OV, Miller LH, Saul A, Long CA. Development
