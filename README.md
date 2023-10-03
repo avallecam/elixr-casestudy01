@@ -69,14 +69,14 @@ Universidad Nacional de la Amazonia Peruana
 Miura K, Orcutt AC, Muratova OV, Miller LH, Saul A, Long CA. Development
 and characterization of a standardized ELISA including a reference serum
 on each plate to detect antibodies induced by experimental malaria
-vaccines. Vaccine. 2008;26(2):193-200.
-<doi:%5B10.1016/j.vaccine.2007.10.064>\](<https://www.sciencedirect.com/science/article/pii/S0264410X07012601>).
+vaccines. Vaccine. 2008;26(2):193-200. doi:
+[10.1016/j.vaccine.2007.10.064](https://www.sciencedirect.com/science/article/pii/S0264410X07012601).
 
 Sepúlveda N, Stresman G, White MT, Drakeley CJ. Current mathematical
 models for analyzing anti-malarial antibody data with an eye to malaria
 elimination and eradication. Journal of Immunology Research.
-2015;2015:1-21.
-<doi:%5B10.1155/2015/738030>\](<https://www.hindawi.com/journals/jir/2015/738030/>).
+2015;2015:1-21. doi:
+[10.1155/2015/738030](https://www.hindawi.com/journals/jir/2015/738030/).
 
 Saavedra-Langer, R., Marapara, J., Valle-Campos, A., Durand, S.,
 Vásquez-Chasnamote, M. E., Silva, H., & Pinedo-Cancino, V. (2018). IgG
