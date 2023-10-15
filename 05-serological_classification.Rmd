@@ -85,7 +85,11 @@ fig01_a <- data_output_03_abunit %>%
                  position = "identity") +
   facet_grid(~experimento,scales = "free") +
   #theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title="AU linear distribution")
+  labs(
+    title="Linear distribution",
+    x = "Arbitrary Antibody Units",
+    y = "Density"
+  )
 
 fig01_b <- data_output_03_abunit %>% 
   ggplot(aes(sample = estimate)) +
@@ -93,9 +97,27 @@ fig01_b <- data_output_03_abunit %>%
   geom_qq_line(line.p = c(0.25, 0.75)) +
   facet_grid(~experimento,scales = "free") +
   labs(title="Gaussian quantile-quantile plot") +
-  coord_cartesian(ylim = c(0,2000))
+  coord_cartesian(ylim = c(0,2000)) +
+  labs(
+    x = "Theoretical quantiles",
+    y = "Sample quantiles"
+  )
 
-fig01_a / fig01_b
+figure01 <- fig01_a / fig01_b
+
+figure01
+
+ggsave(
+  filename = "figure/05-figure01.png",
+  plot = figure01,
+  width = 6,height = 6
+)
+
+ggsave(
+  filename = "figure/05-figure01.tiff",
+  plot = figure01,
+  width = 6,height = 6
+)
 ```
 
 ## identify missing values
@@ -194,7 +216,7 @@ stat_mixture <- function(model_name, k_component, colour) {
                 args = list(model_name$mu[k_component], 
                             model_name$sigma[k_component], 
                             lam = model_name$lambda[k_component]),
-                colour = colour, lwd = 1.5)
+                colour = colour, lwd = .25)
 }
 ```
 
@@ -215,14 +237,32 @@ model_igg_k2 <- model_output_01 %>%
   pull(mixture_model) %>% 
   pluck(1)
 
+# manual_colors <- c("seronegative" = "red",
+#                    "seropositive" = "blue")
+
+
 fig02a <- data.frame(x = model_igg_k2$x) %>%
+  mutate(experiment = "igg") %>% 
   ggplot() +
   geom_histogram(aes(x, after_stat(density)), 
                  bins = 30,
                  alpha=.5,
                  position = "identity") +
-  stat_mixture(model_name = model_igg_k2,k_component = 1,colour = "red") +
-  stat_mixture(model_name = model_igg_k2,k_component = 2,colour = "blue")
+  facet_wrap(~experiment) +
+  stat_mixture(model_name = model_igg_k2,
+               k_component = 1,
+               colour = "red") +
+  stat_mixture(model_name = model_igg_k2,
+               k_component = 2,
+               colour = "blue") +
+  labs(
+    # title="Linear distribution",
+    x = "Arbitrary Antibody Units",
+    y = "Density",
+    caption = "Two distributions:\n- Red: seronegative\n- Blue: seropositive"
+  ) +
+  # scale_colour_manual(values = manual_colors)
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
 ```
 
 ```{r}
@@ -233,14 +273,23 @@ model_igg_k3 <- model_output_01 %>%
   pluck(1)
 
 fig02b <- data.frame(x = model_igg_k3$x) %>%
+  mutate(experiment = "igg") %>% 
   ggplot() +
   geom_histogram(aes(x, after_stat(density)), 
                  bins = 30,
                  alpha=.5,
                  position = "identity") +
+  facet_wrap(~experiment) +
   stat_mixture(model_name = model_igg_k3,k_component = 1,colour = "red") +
   stat_mixture(model_name = model_igg_k3,k_component = 2,colour = "blue") +
-  stat_mixture(model_name = model_igg_k3,k_component = 3,colour = "green")
+  stat_mixture(model_name = model_igg_k3,k_component = 3,colour = "green") +
+  labs(
+    # title="Linear distribution",
+    x = "Arbitrary Antibody Units",
+    y = "Density",
+    caption = "red : seronegative\nblue : seropositive\ngreen : boosting upon recurrent infection"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
 ```
 
 ```{r,fig.height=3,fig.width=7}
@@ -257,13 +306,22 @@ model_avi_k2 <- model_output_01 %>%
   pluck(1)
 
 fig03a <- data.frame(x = model_avi_k2$x) %>%
+  mutate(experiment = "igg-avidez") %>% 
   ggplot() +
   geom_histogram(aes(x, after_stat(density)), 
                  bins = 30,
                  alpha=.5,
                  position = "identity") +
+  facet_wrap(~experiment) +
   stat_mixture(model_name = model_avi_k2,k_component = 1,colour = "red") +
-  stat_mixture(model_name = model_avi_k2,k_component = 2,colour = "blue")
+  stat_mixture(model_name = model_avi_k2,k_component = 2,colour = "blue") +
+  labs(
+    # title="Linear distribution",
+    x = "Arbitrary Antibody Units",
+    y = "Density",
+    caption = "Two distributions:\n- Red: seronegative\n- Blue: seropositive"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
 ```
 
 ```{r}
@@ -274,20 +332,48 @@ model_avi_k3 <- model_output_01 %>%
   pluck(1)
 
 fig03b <- data.frame(x = model_avi_k3$x) %>%
+  mutate(experiment = "igg-avidez") %>% 
   ggplot() +
   geom_histogram(aes(x, after_stat(density)), 
                  bins = 30,
                  alpha=.5,
                  position = "identity") +
+  facet_wrap(~experiment) +
   stat_mixture(model_name = model_avi_k3,k_component = 1,colour = "red") +
   stat_mixture(model_name = model_avi_k3,k_component = 2,colour = "blue") +
-  stat_mixture(model_name = model_avi_k3,k_component = 3,colour = "green")
+  stat_mixture(model_name = model_avi_k3,k_component = 3,colour = "green") +
+  labs(
+    # title="Linear distribution",
+    x = "Arbitrary Antibody Units",
+    y = "Density",
+    caption = "red : seronegative\nblue : seropositive\ngreen : boosting upon recurrent infection"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
 ```
 
 ```{r,fig.height=3,fig.width=7}
 fig03a + fig03b
 ```
 
+### choice
+
+```{r,fig.height=3,fig.width=7}
+figure02 <- fig02a + fig03a
+
+figure02
+
+ggsave(
+  filename = "figure/05-figure02-comp2.png",
+  plot = figure02,
+  height = 3.5, width = 7
+)
+
+ggsave(
+  filename = "figure/05-figure02-comp2.tiff",
+  plot = figure02,
+  height = 3.5, width = 7
+)
+```
 
 # classify seropositivity
 
@@ -374,57 +460,244 @@ data_output_04 %>%
 ### by distribution
 
 ```{r,fig.height=5,fig.width=8}
-data_output_04 %>% 
+figure04_1 <- 
+  data_output_04 %>% 
   ggplot(aes(x = estimate, 
              fill = class, 
              after_stat(density))) +
   geom_histogram(binwidth = 50,
                  alpha=.5,
                  position = "identity") +
-  facet_wrap(~experimento+component_n,scales = "free")
+  facet_wrap(~experimento+component_n,scales = "free") +
+  labs(
+    # title="Linear distribution",
+    x = "Arbitrary Antibody Units",
+    y = "Density",
+    fill = "Classification",
+    caption = "s- : seronegative\ns0 : undetermined\ns+ : seropositive\ns++ : boosting upon recurrent infection"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
 
-data_output_04 %>% 
+figure04_1
+
+# ggsave(
+#   filename = "figure/05-figure04_1.png",
+#   plot = figure04_1,
+#   height = 5.5, width = 8
+# )
+# 
+# ggsave(
+#   filename = "figure/05-figure04_1.tiff",
+#   plot = figure04_1,
+#   height = 5.5, width = 8
+# )
+```
+
+```{r,fig.height=5,fig.width=8}
+figure04_2 <- 
+  data_output_04 %>% 
   ggplot(aes(x = estimate,
              fill = class_sum, 
              after_stat(density))) +
   geom_histogram(binwidth = 50,
                  alpha=.5,
                  position = "identity") +
-  facet_wrap(~experimento+component_n,scales = "free")
+  facet_wrap(~experimento+component_n,scales = "free") +
+  labs(
+    # title="Linear distribution",
+    x = "Arbitrary Antibody Units",
+    y = "Density",
+    fill = "Classification",
+    caption = "s- : seronegative\ns0 : undetermined\ns+ : seropositive"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
+
+figure04_2
+
+# ggsave(
+#   filename = "figure/05-figure04_2.png",
+#   plot = figure04_2,
+#   height = 5.5, width = 8
+# )
+# 
+# ggsave(
+#   filename = "figure/05-figure04_2.tiff",
+#   plot = figure04_2,
+#   height = 5.5, width = 8
+# )
 ```
+
 
 ### by frecuency
 
-```{r,fig.height=5,fig.width=6}
-data_output_04 %>% 
+```{r,fig.height=5.5,fig.width=6}
+figure05_1 <- 
+  data_output_04 %>% 
   ggplot(aes(x = class)) +
   geom_bar() +
-  facet_wrap(~experimento+component_n)
+  facet_wrap(~experimento+component_n) +
+  labs(
+    # title="Linear distribution",
+    x = "Serological Classification",
+    y = "Frequency",
+    caption = "s- : seronegative\ns0 : undetermined\ns+ : seropositive\ns++ : boosting upon recurrent infection"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
+```
 
-data_output_04 %>% 
+```{r,fig.height=5.5,fig.width=6}
+figure05_2 <- 
+  data_output_04 %>% 
   ggplot(aes(x = class_sum)) +
   geom_bar() +
-  facet_wrap(~experimento+component_n)
+  facet_wrap(~experimento+component_n) +
+  labs(
+    # title="Linear distribution",
+    x = "Serological Classification",
+    y = "Frequency",
+    caption = "s- : seronegative\ns0 : undetermined\ns+ : seropositive"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
 ```
+
+#### choice
+
+```{r,fig.height=5.5,fig.width=6}
+data_output_04 %>% 
+  count(component_n)
+
+figure05 <- 
+  data_output_04 %>%
+  filter(component_n == 2) %>% 
+  ggplot(aes(x = class_sum)) +
+  geom_bar() +
+  facet_wrap(~experimento
+             # +component_n
+             ) +
+  labs(
+    # title="Linear distribution",
+    x = "Serological Classification",
+    y = "Frequency",
+    caption = "s- : seronegative\ns0 : undetermined\ns+ : seropositive"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
+
+figure05
+
+ggsave(
+  filename = "figure/05-figure05-comp2.png",
+  plot = figure05,
+  height = 3.5, width = 6
+)
+
+ggsave(
+  filename = "figure/05-figure05-comp2.tiff",
+  plot = figure05,
+  height = 3.5, width = 6
+)
+```
+
 
 ### by classification probability
 
-```{r,fig.height=5,fig.width=7}
-data_output_04 %>% 
+```{r,fig.height=5.5,fig.width=7}
+figure06_1 <- 
+  data_output_04 %>% 
   ggplot() +
   geom_line(aes(x = estimate,y = comp.1), colour="red", lwd = 1.5) +
   geom_line(aes(x = estimate,y = comp.2), colour="blue", lwd = 1.5) +
   geom_line(aes(x = estimate,y = comp.3), colour="green", lwd = 1.5) +
   geom_hline(yintercept = class_probability, col = "black") +
-  facet_wrap(~experimento+component_n,scales = "free")
+  facet_wrap(~experimento+component_n,scales = "free") +
+  labs(
+    # title="Linear distribution",
+    x = "Arbitrary Antibody Units",
+    y = "Classification Probability",
+    caption = "red : seronegative\nblue : seropositive\ngreen : boosting upon recurrent infection\nblack : 90% classification probability"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
 
-data_output_04 %>% 
+figure06_1
+
+# ggsave(
+#   filename = "figure/05-figure06_1.png",
+#   plot = figure06_1,
+#   height = 5.5, width = 7
+# )
+# 
+# ggsave(
+#   filename = "figure/05-figure06_1.tiff",
+#   plot = figure06_1,
+#   height = 5.5, width = 7
+# )
+```
+
+```{r,fig.height=5.5,fig.width=7}
+figure06_2 <- 
+  data_output_04 %>% 
   ggplot() +
   geom_line(aes(x = estimate,y = comp.1), colour="red", lwd = 1.5) +
   geom_line(aes(x = estimate,y = comp.23), colour="blue", lwd = 1.5) +
   geom_hline(yintercept = class_probability, col = "black") +
-  facet_wrap(~experimento+component_n,scales = "free")
+  facet_wrap(~experimento+component_n,scales = "free") +
+  labs(
+    # title="Linear distribution",
+    x = "Arbitrary Antibody Units",
+    y = "Classification Probability",
+    caption = "red : seronegative\nblue : seropositive\nblack : 90% classification probability"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
+
+figure06_2
+
+# ggsave(
+#   filename = "figure/05-figure06_2.png",
+#   plot = figure06_2,
+#   height = 5.5, width = 7
+# )
+# 
+# ggsave(
+#   filename = "figure/05-figure06_2.tiff",
+#   plot = figure06_2,
+#   height = 5.5, width = 7
+# )
 ```
+
+#### choice
+
+```{r,fig.height=5.5,fig.width=7}
+figure06 <- 
+  data_output_04 %>% 
+  filter(component_n == 2) %>% 
+  ggplot() +
+  geom_line(aes(x = estimate,y = comp.1), colour="red", lwd = 1.5) +
+  geom_line(aes(x = estimate,y = comp.23), colour="blue", lwd = 1.5) +
+  geom_hline(yintercept = class_probability, col = "black") +
+  facet_wrap(~experimento#+component_n
+             ,scales = "free") +
+  labs(
+    # title="Linear distribution",
+    x = "Arbitrary Antibody Units",
+    y = "Classification Probability",
+    caption = "Red: seronegative\nBlue: seropositive\nBlack: 90% probability"
+  ) +
+  theme(plot.caption = element_text(hjust = 0)) # set the left align here
+
+figure06
+
+ggsave(
+  filename = "figure/05-figure06_2.png",
+  plot = figure06,
+  height = 3.5, width = 7
+)
+
+ggsave(
+  filename = "figure/05-figure06_2.tiff",
+  plot = figure06,
+  height = 3.5, width = 7
+)
+```
+
 
 ## select model 
 
@@ -479,6 +752,7 @@ data_output_05 %>%
 
 later
 
+- [ ] goal: replace `stat_mixture` with sth that add the color labels in legends
 - [ ] replace `plot_mix_comps` with broom like function for tidy tibble model summary
 - [ ] replace density plots by automatic color based plots
 - [ ] remove redundant n=3 plots

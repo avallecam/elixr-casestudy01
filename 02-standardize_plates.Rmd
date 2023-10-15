@@ -78,14 +78,45 @@ data6 <- data4 %>%
 ## descriptive
 
 ```{r,fig.height=10,fig.width=10}
-data5 %>% 
+figure01 <- 
+  data5 %>% 
   ggplot(aes(x = abunits,y = densidad)) +
   geom_point() +
   # geom_smooth() +
-  geom_hline(aes(yintercept=densidad, color = codigo),
-             data = data6) +
+  geom_hline(
+    aes(yintercept=densidad, color = codigo),
+    data = 
+      data6 %>% 
+      mutate(
+        codigo = 
+          case_when(
+            codigo == "ctrl_blanco" ~ "Blank",
+            codigo == "ctrl_negativo" ~ "Negative",
+            codigo == "ctrl_positivo" ~ "Positive"
+          )
+      )
+  ) +
   scale_x_log10() +
-  facet_wrap(~plate+experimento)
+  facet_wrap(~plate+experimento) +
+  labs(
+    x = "Arbitrary Antibody Units",
+    y = "Optical Density",
+    color = "Controls"
+  )
+
+figure01
+
+ggsave(
+  filename = "figure/02-figure01.png",
+  plot = figure01,
+  width = 10,height = 10
+)
+
+ggsave(
+  filename = "figure/02-figure01.tiff",
+  plot = figure01,
+  width = 10,height = 10
+)
 ```
 
 ## log-logistic model
@@ -220,7 +251,8 @@ data7 %>%
 #### con outlier
 
 ```{r,fig.height=10,fig.width=10}
-data7 %>% 
+figure02 <- 
+  data7 %>% 
   ggplot(aes(x = densidad_mean,y = densidad_cv)) +
   geom_point() +
   geom_hline(aes(yintercept=20),
@@ -228,7 +260,25 @@ data7 %>%
   geom_vline(aes(xintercept=0.25),
              linetype="dashed",size=0.3) +
   coord_cartesian(ylim = c(0,100)) +
-  facet_wrap(~plate+experimento)
+  facet_wrap(~plate+experimento) +
+  labs(
+    x = "Mean Optical Density",
+    y = "Coefficient of Variation of replicates"
+  )
+
+figure02
+
+ggsave(
+  filename = "figure/02-figure02.png",
+  plot = figure02,
+  width = 10,height = 10
+)
+
+ggsave(
+  filename = "figure/02-figure02.tiff",
+  plot = figure02,
+  width = 10,height = 10
+)
 ```
 
 #### sin outlier
