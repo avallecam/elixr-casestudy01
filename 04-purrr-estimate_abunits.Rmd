@@ -221,6 +221,17 @@ data_output_02
 
 ## result
 
+```{r}
+hospital_names <- list(
+  'igg'="IgG",
+  'igg-avidez'="IgG avidity"
+)
+
+hospital_labeller <- function(variable,value){
+  return(hospital_names[value])
+}
+```
+
 ```{r,fig.height=10,fig.width=10}
 data_output_02_pred <- data_output_02 %>%
   dplyr::select(plate,experimento,prediction) %>% 
@@ -249,7 +260,7 @@ figure01 <-
   geom_point(data = data_stdc,
              mapping = aes(x = abunits,y = densidad)) +
   scale_x_log10() +
-  facet_wrap(~plate+experimento) +
+  facet_wrap(~plate+experimento, labeller = hospital_labeller) +
   labs(
     x = "Arbitrary Antibody Units",
     y = "Optical Density", 
@@ -399,7 +410,7 @@ figure02 <-
                     xmin = lower, xmax = upper),
                 data = data_output_03_abunit) +
   scale_x_log10() +
-  facet_wrap(~plate+experimento) +
+  facet_wrap(~plate+experimento, labeller = hospital_labeller) +
   labs(
     x = "Arbitrary Antibody Units",
     y = "Optical Density", 

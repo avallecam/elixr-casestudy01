@@ -77,6 +77,18 @@ data6 <- data4 %>%
 
 ## descriptive
 
+```{r}
+hospital_names <- list(
+  'igg'="IgG",
+  'igg-avidez'="IgG avidity"
+)
+
+hospital_labeller <- function(variable,value){
+  return(hospital_names[value])
+}
+```
+
+
 ```{r,fig.height=10,fig.width=10}
 figure01 <- 
   data5 %>% 
@@ -97,7 +109,7 @@ figure01 <-
       )
   ) +
   scale_x_log10() +
-  facet_wrap(~plate+experimento) +
+  facet_wrap(~plate+experimento,labeller = hospital_labeller) +
   labs(
     x = "Arbitrary Antibody Units",
     y = "Optical Density",
@@ -260,7 +272,7 @@ figure02 <-
   geom_vline(aes(xintercept=0.25),
              linetype="dashed",size=0.3) +
   coord_cartesian(ylim = c(0,100)) +
-  facet_wrap(~plate+experimento) +
+  facet_wrap(~plate+experimento, labeller = hospital_labeller) +
   labs(
     x = "Mean Optical Density",
     y = "Coefficient of Variation of replicates"

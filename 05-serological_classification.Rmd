@@ -72,6 +72,17 @@ data_output_03_abunit %>%
 
 # explore data
 
+```{r}
+hospital_names <- list(
+  'igg'="IgG",
+  'igg-avidez'="IgG avidity"
+)
+
+hospital_labeller <- function(variable,value){
+  return(hospital_names[value])
+}
+```
+
 ## antibody distribution in sample
 
 ```{r,fig.height=6,fig.width=6,warning=FALSE}
@@ -83,7 +94,7 @@ fig01_a <- data_output_03_abunit %>%
                  bins = 60,
                  alpha=.5, 
                  position = "identity") +
-  facet_grid(~experimento,scales = "free") +
+  facet_grid(~experimento,scales = "free", labeller = hospital_labeller) +
   #theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(
     title="Linear distribution",
@@ -95,7 +106,7 @@ fig01_b <- data_output_03_abunit %>%
   ggplot(aes(sample = estimate)) +
   geom_qq(alpha=.2) +
   geom_qq_line(line.p = c(0.25, 0.75)) +
-  facet_grid(~experimento,scales = "free") +
+  facet_grid(~experimento,scales = "free", labeller = hospital_labeller) +
   labs(title="Gaussian quantile-quantile plot") +
   coord_cartesian(ylim = c(0,2000)) +
   labs(
@@ -248,7 +259,7 @@ fig02a <- data.frame(x = model_igg_k2$x) %>%
                  bins = 30,
                  alpha=.5,
                  position = "identity") +
-  facet_wrap(~experiment) +
+  facet_wrap(~experiment,labeller = hospital_labeller) +
   stat_mixture(model_name = model_igg_k2,
                k_component = 1,
                colour = "red") +
@@ -279,7 +290,7 @@ fig02b <- data.frame(x = model_igg_k3$x) %>%
                  bins = 30,
                  alpha=.5,
                  position = "identity") +
-  facet_wrap(~experiment) +
+  facet_wrap(~experiment, labeller = hospital_labeller) +
   stat_mixture(model_name = model_igg_k3,k_component = 1,colour = "red") +
   stat_mixture(model_name = model_igg_k3,k_component = 2,colour = "blue") +
   stat_mixture(model_name = model_igg_k3,k_component = 3,colour = "green") +
@@ -312,7 +323,7 @@ fig03a <- data.frame(x = model_avi_k2$x) %>%
                  bins = 30,
                  alpha=.5,
                  position = "identity") +
-  facet_wrap(~experiment) +
+  facet_wrap(~experiment, labeller = hospital_labeller) +
   stat_mixture(model_name = model_avi_k2,k_component = 1,colour = "red") +
   stat_mixture(model_name = model_avi_k2,k_component = 2,colour = "blue") +
   labs(
@@ -338,7 +349,7 @@ fig03b <- data.frame(x = model_avi_k3$x) %>%
                  bins = 30,
                  alpha=.5,
                  position = "identity") +
-  facet_wrap(~experiment) +
+  facet_wrap(~experiment, labeller = hospital_labeller) +
   stat_mixture(model_name = model_avi_k3,k_component = 1,colour = "red") +
   stat_mixture(model_name = model_avi_k3,k_component = 2,colour = "blue") +
   stat_mixture(model_name = model_avi_k3,k_component = 3,colour = "green") +
@@ -468,7 +479,7 @@ figure04_1 <-
   geom_histogram(binwidth = 50,
                  alpha=.5,
                  position = "identity") +
-  facet_wrap(~experimento+component_n,scales = "free") +
+  facet_wrap(~experimento+component_n,scales = "free",labeller = hospital_labeller) +
   labs(
     # title="Linear distribution",
     x = "Arbitrary Antibody Units",
@@ -502,7 +513,7 @@ figure04_2 <-
   geom_histogram(binwidth = 50,
                  alpha=.5,
                  position = "identity") +
-  facet_wrap(~experimento+component_n,scales = "free") +
+  facet_wrap(~experimento+component_n,scales = "free",labeller = hospital_labeller) +
   labs(
     # title="Linear distribution",
     x = "Arbitrary Antibody Units",
@@ -535,7 +546,7 @@ figure05_1 <-
   data_output_04 %>% 
   ggplot(aes(x = class)) +
   geom_bar() +
-  facet_wrap(~experimento+component_n) +
+  facet_wrap(~experimento+component_n,labeller = hospital_labeller) +
   labs(
     # title="Linear distribution",
     x = "Serological Classification",
@@ -550,7 +561,7 @@ figure05_2 <-
   data_output_04 %>% 
   ggplot(aes(x = class_sum)) +
   geom_bar() +
-  facet_wrap(~experimento+component_n) +
+  facet_wrap(~experimento+component_n, labeller = hospital_labeller) +
   labs(
     # title="Linear distribution",
     x = "Serological Classification",
@@ -571,7 +582,7 @@ figure05 <-
   filter(component_n == 2) %>% 
   ggplot(aes(x = class_sum)) +
   geom_bar() +
-  facet_wrap(~experimento
+  facet_wrap(~experimento, labeller = hospital_labeller
              # +component_n
              ) +
   labs(
@@ -608,7 +619,7 @@ figure06_1 <-
   geom_line(aes(x = estimate,y = comp.2), colour="blue", lwd = 1.5) +
   geom_line(aes(x = estimate,y = comp.3), colour="green", lwd = 1.5) +
   geom_hline(yintercept = class_probability, col = "black") +
-  facet_wrap(~experimento+component_n,scales = "free") +
+  facet_wrap(~experimento+component_n,scales = "free",labeller = hospital_labeller) +
   labs(
     # title="Linear distribution",
     x = "Arbitrary Antibody Units",
@@ -639,7 +650,7 @@ figure06_2 <-
   geom_line(aes(x = estimate,y = comp.1), colour="red", lwd = 1.5) +
   geom_line(aes(x = estimate,y = comp.23), colour="blue", lwd = 1.5) +
   geom_hline(yintercept = class_probability, col = "black") +
-  facet_wrap(~experimento+component_n,scales = "free") +
+  facet_wrap(~experimento+component_n,scales = "free",labeller = hospital_labeller) +
   labs(
     # title="Linear distribution",
     x = "Arbitrary Antibody Units",
@@ -674,7 +685,7 @@ figure06 <-
   geom_line(aes(x = estimate,y = comp.23), colour="blue", lwd = 1.5) +
   geom_hline(yintercept = class_probability, col = "black") +
   facet_wrap(~experimento#+component_n
-             ,scales = "free") +
+             ,scales = "free",labeller = hospital_labeller) +
   labs(
     # title="Linear distribution",
     x = "Arbitrary Antibody Units",
@@ -686,13 +697,13 @@ figure06 <-
 figure06
 
 ggsave(
-  filename = "figure/05-figure06_2.png",
+  filename = "figure/05-figure06-comp2.png",
   plot = figure06,
   height = 3.5, width = 7
 )
 
 ggsave(
-  filename = "figure/05-figure06_2.tiff",
+  filename = "figure/05-figure06-comp2.tiff",
   plot = figure06,
   height = 3.5, width = 7
 )
