@@ -11,3 +11,6 @@ data/*.rds
 data/*.xlsx
 data/*.rds
 data/*.csv
+.Rbuildignore
+figure/*.png
+figure/*.tiff
