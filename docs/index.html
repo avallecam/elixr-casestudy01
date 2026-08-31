@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>elixr-casestudy01</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --fg: #1b1f23;
+    --muted: #57606a;
+    --border: #d0d7de;
+    --link: #0969da;
+    --card-bg: #f6f8fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --fg: #e6edf3;
+      --muted: #9198a1;
+      --border: #30363d;
+      --link: #4493f8;
+      --card-bg: #161b22;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+  }
+  h1 {
+    font-size: 1.75rem;
+    margin: 0 0 0.5rem;
+  }
+  p.lede {
+    color: var(--muted);
+    margin: 0 0 2rem;
+  }
+  .note {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.92rem;
+    margin: 0 0 2rem;
+  }
+  .note a { color: var(--link); }
+  ol.reports {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  ol.reports li {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    padding: 0.9rem 1.1rem;
+  }
+  ol.reports a {
+    color: var(--link);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  ol.reports a:hover { text-decoration: underline; }
+  ol.reports .desc {
+    display: block;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 400;
+    margin-top: 0.15rem;
+  }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  footer a { color: var(--link); }
+</style>
+</head>
+<body>
+<main>
+  <h1>elixr-casestudy01</h1>
+  <p class="lede">
+    Rendered reports for a serological survey workflow that <strong>collects</strong>
+    multiple plate files with <code>{plater}</code>, <strong>standardizes</strong>
+    Antibody Units across plates (Miura K, 2008), and <strong>classifies</strong>
+    seropositivity from Antibody Units (Sepúlveda N, 2015).
+  </p>
+
+  <div class="note">
+    These reports document the analysis workflow used for
+    Guerra Manihuari, C. A. (2024). <em>Seropositividad de toxoplasmosis en
+    pacientes VIH empleando unidades arbitrarias de anticuerpos</em>
+    [Tesis, Universidad Nacional de la Amazonía Peruana]. Available at the
+    <a href="https://repositorio.unapiquitos.edu.pe/items/8b9566fe-bc42-4ee5-9542-73d1b1993411">UNAP institutional repository</a>.
+  </div>
+
+  <ol class="reports">
+    <li>
+      <a href="01-test_template.html">01 &middot; Test plate template</a>
+      <span class="desc">Reading multiple plate layouts with {plater}.</span>
+    </li>
+    <li>
+      <a href="02-standardize_plates.html">02 &middot; Standardize plates</a>
+      <span class="desc">Standardizing Antibody Units across plates.</span>
+    </li>
+    <li>
+      <a href="03-estimate_abunits.html">03 &middot; Estimate antibody units</a>
+      <span class="desc">Dose-response curve fitting for a single plate.</span>
+    </li>
+    <li>
+      <a href="04-purrr-estimate_abunits.html">04 &middot; Estimate antibody units (purrr)</a>
+      <span class="desc">Iterating the estimation across all plates with purrr.</span>
+    </li>
+    <li>
+      <a href="05-serological_classification.html">05 &middot; Serological classification</a>
+      <span class="desc">Classifying seropositivity from Antibody Units.</span>
+    </li>
+    <li>
+      <a href="06-compare_classification.html">06 &middot; Compare classification</a>
+      <span class="desc">Comparing classification methods.</span>
+    </li>
+  </ol>
+
+  <footer>
+    Source: <a href="https://github.com/avallecam/elixr-casestudy01">github.com/avallecam/elixr-casestudy01</a>
+    &middot; Author: <a href="https://www.github.com/avallecam">@avallecam</a>
+  </footer>
+</main>
+</body>
+</html>

@@ -14,3 +14,13 @@ data/*.csv
 .Rbuildignore
 figure/*.png
 figure/*.tiff
+
+# GitHub Pages site: un-ignore the published reports
+docs/*
+!docs/index.html
+!docs/01-test_template.html
+!docs/02-standardize_plates.html
+!docs/03-estimate_abunits.html
+!docs/04-purrr-estimate_abunits.html
+!docs/05-serological_classification.html
+!docs/06-compare_classification.html

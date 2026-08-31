@@ -18,6 +18,9 @@ serological survey workflow to:
   using method proposed by [Sepulveda N,
   2015](https://www.hindawi.com/journals/jir/2015/738030/)
 
+Rendered reports are published at
+[avallecam.github.io/elixr-casestudy01](https://avallecam.github.io/elixr-casestudy01/).
+
 ## Installation
 
 - Clone this repository. Follow [this steps to create a new Rstudio
@@ -84,3 +87,8 @@ subclass responses to excreted-secreted antigens of Plasmodium
 falciparum in a low-transmission malaria area of the Peruvian Amazon.
 Malaria journal, 17(1), 1-10. doi:
 [10.1186/s12936-018-2471-6](https://malariajournal.biomedcentral.com/articles/10.1186/s12936-018-2471-6).
+
+Guerra Manihuari, C. A. (2024). Seropositividad de toxoplasmosis en
+pacientes VIH empleando unidades arbitrarias de anticuerpos \[Tesis,
+Universidad Nacional de la Amazonía Peruana\]. [UNAP institutional
+repository](https://repositorio.unapiquitos.edu.pe/items/8b9566fe-bc42-4ee5-9542-73d1b1993411).
